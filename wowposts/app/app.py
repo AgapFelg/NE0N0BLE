@@ -7,6 +7,15 @@ db = SQLAlchemy()
 # создание экземпляра приложения
 app = Flask(__name__)
 
+#МАРШРУТ ДЛЯ КАСТОМНЫХ ОШИБОК
+#--------ДОБАВИТЬ МАРШРУТ
+#***************************
+
+# МАРШРУТ ДЛЯ ЗАГРУЗКИ ФАЙЛОВ
+@app.route('/upload')
+def upload_file():
+    return 'uploading file'
+#====#====#====#
 # МАРШРУТЫ ДЛЯ РАБОТЫ С ЛОГИНОМ РЕГИСТРАЦИЕЙ И ТД
 # маршрут логина
 @app.route('/login', methods=['GET', 'POST'])
@@ -32,6 +41,11 @@ def register():
 def home():
     return 'home'
 
+# маршрут в котором будут показываться посты только пользователей, на которых оформлена подписка
+@app.route('/feed')
+def feed():
+    return 'feed'
+
 # маршрут "о нас"
 @app.route('/about')
 def about():
@@ -43,6 +57,16 @@ def about():
 # РЕДАКТИРОВАТЬ ПРОФИЛЬ
 def show_user_profile(username):
     return f'user: {username}'
+
+# Маршрут для подписки на пользователя
+@app.route('/user/<username>/follow')
+def follow(username):
+    return f'follow on {username}'
+
+# Маршрут для редактирования профиля
+@app.route('/user/<username>/edit')
+def user_edit(username):
+    return f'edititng profile of {username}'
 #====#====#====#
 # МАРШРУТЫ РАБОТЫ С ПОСТАМИ
 # маршрут создания поста
@@ -76,6 +100,11 @@ def edit_comment(comment_id):
 def delete_comment(comment_id):
     return f'deleting comment #{comment_id}'
 # маршрут удаления поста
+#====#====#====#
+# МАРШРУТ ДЛЯ ПОИСКА ПО ПОСТАМ
+@app.route('/search?q=<query>')
+def search(query):
+    return f'results on {query}'
 # -------------------------
 
 # запуск приложения
