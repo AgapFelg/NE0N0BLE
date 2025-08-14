@@ -1,6 +1,6 @@
 # импорт необходимых модулей
-from flask import Flask, render_template, request, redirect, url_for, flask, sjonify, abort
-from flask_login import LoginManager, login_user, lofout_user, login_required, current_user
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, abort
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
 # импорт веркзеурга
@@ -36,26 +36,47 @@ def upload_file():
 #====#====#====#
 # МАРШРУТЫ ДЛЯ РАБОТЫ С ЛОГИНОМ РЕГИСТРАЦИЕЙ И ТД
 # маршрут логина
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+# логин
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
     if request.method == 'POST':
-        return 'POST-method'
-    else:
-        return 'login-form'
+        user = User.query.filter_by(email=request.form['email']).first()
+        if user and check_password_hash(user.password_hash, request.form['password']):
+            login_user(user)
+            return redirect(url_for('home'))
+        flash("НЕверный email или пароль", 'danger')
+    return render_template('auth/login.html')
 
-# маршрут логаута
+# логаут
 @app.route('/logout')
+@login_required
 def logout():
-    return redirect(url_for('login'))
+    logout_user()
+    return redirect(url_for('home'))
 
-# маршрут регистрации
-@app.route('/register', methods=['GET', 'POST'])
+# регистрация
+@app.route('/register', methods=['GET', 'POST']))
 def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
     if request.method == 'POST':
-        hashed_pw = generate_password_hash(request.form['password'])
-        new_user = User(username=request.form['username'],
-                        email=request.form['email'],
-                        password_hash=hashed_pw)
+        hash_of_password = generate_password_hash(request.form['password'])
+        user = User(username=request.form['username'], email=request.form['email'],
+                    password_hash=hash_of_password)
+        try:
+            db.session.add(user)
+            db.session.commit()
+            flash('Регистрация выполнена', 'success')
+            return redirect(url_for('login'))
+        except:
+            flash('Регистрация не выполнена', 'danger')
+    return render_template('auth/register.html')
 #====#====#====#
 # БАЗОВЫЕ МАРШРУТЫ
 # основной маршрут
@@ -76,7 +97,7 @@ def feed():
 # маршрут "о нас"
 @app.route('/about')
 def about():
-    return 'about us'
+    return render_template('about.html')
 #====#====#====#
 # МАРШРУТЫ РАБОТЫ С ПРОФИЛЕМ
 # маршрут профиля пользователя
