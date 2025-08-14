@@ -1,11 +1,29 @@
 # импорт необходимых модулей
-from flask import Flask, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flask, sjonify, abort
+from flask_login import LoginManager, login_user, lofout_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
+from config import Config
+# импорт веркзеурга
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+# импорт моделей
+from models import User, Post, Comment, Like, Follow
+from datetime import datetime
+import os
 
-# создание экземпляра БД
-db = SQLAlchemy()
+# создание экземпляра конфига
+config = Config()
 # создание экземпляра приложения
 app = Flask(__name__)
+# конфигурация приложения
+app.config['SQLALCHEMY_DATABASE_URI'] = config.database_uri
+app.config['SECRET_KEY'] = config.secret_key
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+# инициализация БД
+db = SQLAlchemy(app)
+# инициализация логин манагера
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
 
 #МАРШРУТ ДЛЯ КАСТОМНЫХ ОШИБОК
 #--------ДОБАВИТЬ МАРШРУТ
@@ -31,20 +49,29 @@ def logout():
     return redirect(url_for('login'))
 
 # маршрут регистрации
-@app.route('/register')
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    return 'register-form'
+    if request.method == 'POST':
+        hashed_pw = generate_password_hash(request.form['password'])
+        new_user = User(username=request.form['username'],
+                        email=request.form['email'],
+                        password_hash=hashed_pw)
 #====#====#====#
 # БАЗОВЫЕ МАРШРУТЫ
 # основной маршрут
 @app.route('/')
 def home():
-    return 'home'
+    page = request.args.get('page', 1, type=int)
+    posts = Post.query.order_by(Post.created_at.desc()).paginate(page=page, per_page=5)
+    return render_template('index.html', posts=posts)
 
 # маршрут в котором будут показываться посты только пользователей, на которых оформлена подписка
 @app.route('/feed')
+@login_required
 def feed():
-    return 'feed'
+    followed_ids = [f.followed_id for f in current_user.following]
+    posts = Post.query.filter(Post.user_id.in_(followed_ids)).order_by(Post.created_at.desc()).all()
+    return render_template('feed.html', posts=posts)
 
 # маршрут "о нас"
 @app.route('/about')
@@ -53,24 +80,23 @@ def about():
 #====#====#====#
 # МАРШРУТЫ РАБОТЫ С ПРОФИЛЕМ
 # маршрут профиля пользователя
-@app.route('/user/<username>')# НУЖНО СДЕЛАТЬ ЧТОБЫ ПОЛЬЗОВАТЕЛЬ МОГ
-# РЕДАКТИРОВАТЬ ПРОФИЛЬ
+@app.route('/user/<username>')
 def show_user_profile(username):
     return f'user: {username}'
 
 # Маршрут для подписки на пользователя
-@app.route('/user/<username>/follow')
+@app.route('/user/<username>/follow', methods=['POST'])
 def follow(username):
     return f'follow on {username}'
 
 # Маршрут для редактирования профиля
-@app.route('/user/<username>/edit')
+@app.route('/user/<username>/edit', methods=['POST'])
 def user_edit(username):
     return f'edititng profile of {username}'
 #====#====#====#
 # МАРШРУТЫ РАБОТЫ С ПОСТАМИ
 # маршрут создания поста
-@app.route('/post/create')
+@app.route('/post/create', methods=['GET', 'POST'])
 def create_post():
     return 'create post'
 
@@ -80,23 +106,23 @@ def detail_post(post_id):
     return f'post #{post_id}'
 
 # маршрут редактирования поста
-@app.route('/post/<int:post_id>/edit')
+@app.route('/post/<int:post_id>/edit', methods=['POST'])
 def edit_post(post_id):
     return f'rditing post #{post_id}'
 #====#====#====#
 # МАРШРУТЫ РАБОТЫ С КОММЕНТАРИЯМИ
 # маршрут добавления комментария
-@app.route('/post/<int:post_id>/comment')
+@app.route('/post/<int:post_id>/comment', methods=['POST'])
 def add_comment(post_id):
     return f'add comment to post #{post_id}'
 
 # маршрут редактирования комментария
-@app.route('/comment/<int:comment_id>/edit')
+@app.route('/comment/<int:comment_id>/edit', methods=['POST'])
 def edit_comment(comment_id):
     return f'editing comment #{comment_id}'
 
 # маршрут удаления комментария
-@app.route('/comment/<int:comment_id>/delete')
+@app.route('/comment/<int:comment_id>/delete', methods=['POST'])
 def delete_comment(comment_id):
     return f'deleting comment #{comment_id}'
 # маршрут удаления поста
