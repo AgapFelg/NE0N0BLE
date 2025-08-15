@@ -61,7 +61,7 @@ def logout():
     return redirect(url_for('home'))
 
 # регистрация
-@app.route('/register', methods=['GET', 'POST']))
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
@@ -103,57 +103,191 @@ def about():
 # маршрут профиля пользователя
 @app.route('/user/<username>')
 def show_user_profile(username):
-    return f'user: {username}'
+    user = User.query.filter_by(username=username).first_or_404()
+    posts = Post.query.filter_by(user_id=user.id).order_by(Post.created_at.desc()).all()
+    return render_template('user/profile.html', user=user, posts=posts)
 
 # Маршрут для подписки на пользователя
 @app.route('/user/<username>/follow', methods=['POST'])
 def follow(username):
-    return f'follow on {username}'
+    user = User.query.filter_by(username=username).first_or_404()
+    if user == current_user:
+        flash('Нельзя подписаться на самого себя', 'warning')
+        return redirect(url_for('show_user_profile', username=username))
+    existing_follow = Follow.query.filter_by(follower_id=current_user.id, followed_id=user.id).first()
+    if existing_follow:
+        db.session.delete(existing_follow)
+        db.session.commit()
+        flash(f'Отписка от {username}', 'info')
+    else:
+        new_follow = Follow(follower_id=current_user.id, followed_id=user.id)
+        db.session.add(new_follow)
+        db.session.commit()
+        flash(f'Подписка на {username}', 'success')
+    return redirect(url_for('show_user_profile', username=username))
 
 # Маршрут для редактирования профиля
-@app.route('/user/<username>/edit', methods=['POST'])
+@app.route('/user/<username>/edit', methods=['GET', 'POST'])
 def user_edit(username):
-    return f'edititng profile of {username}'
+    if current_user.username != username:
+        abort(403)
+    if request.method == 'POST':
+        current_user.biography = request.form['biography']
+        if 'avatar' in request.files:
+            file = request.files['avatar']
+            if file.filename:
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                current_user.avatar = filename
+            db.session.commit()
+            flash('Профиль изменен успешно', 'success')
+        return redirect(url_for('show_user_profile', username=username))
+    return render_template('user/edit.html')
 #====#====#====#
 # МАРШРУТЫ РАБОТЫ С ПОСТАМИ
 # маршрут создания поста
 @app.route('/post/create', methods=['GET', 'POST'])
+@login_required
 def create_post():
-    return 'create post'
+    if request.method == 'POST':
+        post = Post(text=request.form['text'], user_id=current_user.id)
+        if 'image' in request.files:
+            file = request.files['image']
+            if file.filename:
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.cpnfig['UPLOAD_FOLDER'], filename))
+                post.image = filename
+        db.session.add(post)
+        db.session.commit()
+        flash('Запощнено', 'success')
+        return redirect(url_for('home'))
+    return render_template('post/create.html')
 
 # маршрут детализации поста
 @app.route('/post/<int:post_id>')
 def detail_post(post_id):
-    return f'post #{post_id}'
+    post = Post.query.get_or_404(post_id)
+    return render_template('post/detail.html', post=post)
 
 # маршрут редактирования поста
-@app.route('/post/<int:post_id>/edit', methods=['POST'])
+@app.route('/post/<int:post_id>/edit', methods=['GET', 'POST'])
+@login_required
 def edit_post(post_id):
-    return f'rditing post #{post_id}'
+    post = Post.query.get_or_404(post_id)
+    if post.author != current_user:
+        abort(403)
+    if request.method == 'POST':
+        post.text = request.form['text']
+        if 'image' in request.files:
+            file = request.files['image']
+            if file.filename:
+                # делитинг старого изображения
+                if post.image:
+                    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], post.image))
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                post.image = filename
+        db.session.commit()
+        flash('Пост изменен успешно', 'success')
+        return redirect(url_for('detail_post', post_id=post.id))
+    return render_template('post/edit.html', post=post)
+
+# маршрут удаления поста
+@app.route('/post/<int:post_id>/delete', methods=['POST'])
+@login_required
+def delete_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.author != current_user and not current_user.is_admin:
+        abort(403)
+    if post.image:
+        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], post.imae))
+    db.session.delete(post)
+    db.session.commit()
+    flash('Пост делитнут', 'info')
+    return redirect(url_for('home'))
 #====#====#====#
 # МАРШРУТЫ РАБОТЫ С КОММЕНТАРИЯМИ
 # маршрут добавления комментария
 @app.route('/post/<int:post_id>/comment', methods=['POST'])
 def add_comment(post_id):
-    return f'add comment to post #{post_id}'
+    post = Post.query.get_or_404(post_id)
+    comment = Comment(text=request.form['text'], user_id=current_user.id, post_id=post_id)
+    db.session.add(comment)
+    db.session.commit()
+    flash('Комментарий добавлен', 'success')
+    return redirect(url_for('detail_post', post_id=post.id))
 
 # маршрут редактирования комментария
-@app.route('/comment/<int:comment_id>/edit', methods=['POST'])
+@app.route('/comment/<int:comment_id>/edit', methods=['GET', 'POST'])
+@login_required
 def edit_comment(comment_id):
-    return f'editing comment #{comment_id}'
+    comment = Comment.query.get_or_404(comment_id)
+    if comment.author != current_user:
+        abort(403)
+    if request.method == 'POST':
+        comment.text = request.form['text']
+        db.session.commit()
+        flash('Комментарий изменен', 'success')
+        return redirect(url_for('detail_post', post_id=comment.post_id))
+    return render_template('comment/edit.html', post_id=comment.post_id)
 
 # маршрут удаления комментария
 @app.route('/comment/<int:comment_id>/delete', methods=['POST'])
+@login_required
 def delete_comment(comment_id):
-    return f'deleting comment #{comment_id}'
+    comment = Comment.query.get_or_404(comment_id)
+    post_id = comment.post_id
+    if comment.author != current_user and not current_user.is_admin:
+        abort(403)
+    db.session.delete(comment)
+    db.session.commit()
+    flash('Комментарий удален успешно', 'info')
+    return redirect(url_for('detail_post', post_id=post_id))
 # маршрут удаления поста
 #====#====#====#
 # МАРШРУТ ДЛЯ ПОИСКА ПО ПОСТАМ
-@app.route('/search?q=<query>')
+@app.route('/search')
 def search(query):
-    return f'results on {query}'
+    query = request.args.get('q', '')
+    if not query:
+        return redirect(url_for('home'))
+    results = Post.query.filter(Post.text.ilike(f'%{query}%')).order_by(Post.created_at.desc()).all()
+    return render_template('search.html', results=results, query=query)
+
+#====#====#====#
+# МАРШРУТ ДЛЯ ЛАЙКОВ
+@app.route('/like/<int:post_id>', methods=['POST'])
+@login_required
+def like(post_id):
+    post = Post.query.get_or_404(post_id)
+    existing_like = Like.query.filter_by(user_id=current_user.id, post_id=post.id).first()
+    if existing_like:
+        db.session.delete(existing_like)
+        liked = False
+    else:
+        new_like = Like(user_id=current_user.id, post_id=post.id)
+        db.session.add(new_like)
+        liked = True
+    db.session.commit()
+    return jsonify({'liked':liked,'likes_count':len(post.likes)})
+
+#====#====#====#
+# хендлеры-обработчики ошибок
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('errors/404.html'), 404
+
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template('errors/403.html'), 403
+
+@app.errorandler(500)
+def internal_error(e):
+    db.session.rollback()
+    return render_template('errors/500.html'), 500
 # -------------------------
 
 # запуск приложения
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
