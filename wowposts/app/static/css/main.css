@@ -1,0 +1,36 @@
+:root {
+    /* основные цвета, которые используются на нашем сайте */
+    --bg-dark: #0a0a0a; /* черный */
+    --bg-light: #121212 /* еще черный */
+    --primary: #00ff88; /* зеленый */
+    --secondary: #6a00f4; /* фиолетовый */
+    --text-main: e0e0e0; /* текст */
+    --text-muted: #8a8a8a; /* цвет не основного текста */
+    --border: #333333; /* цвет границ */
+    --danger: #ff3860; /* для ворнингов */
+    --gold: #d4af37;
+    --steel: #5a5a5a;
+}
+
+/* #====#====#====# */
+/* Шрифты */
+/* #====#====#====# */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Cinzel:wght@400;700&display=swap');
+
+body {
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 0.5em;
+    backgroud-color: var(--bg-dark);
+    color: var(--text-main);
+}
+
+h1, h2, h3, h4, .aristocrat {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    color: var(--gold);
+}
+
+code, pre {
+    font-family: 'Courier New', monospace;
+    color: var(--primary);
+}
