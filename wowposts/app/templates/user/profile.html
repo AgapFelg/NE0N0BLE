@@ -1,1 +1,344 @@
-2
+{% extends "base.html" %}
+
+{% block title %}ПРОФИЛЬ: {{ user.username }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 2rem;
+        border: 1px solid var(--steel);
+        background: rgba(10, 10, 10, 0.8);
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        border: 2px solid var(--gold);
+        border-radius: 2px;
+        margin-right: 2rem;
+        object-fit: cover;
+    }
+
+    .profile-info {
+        flex-grow: 1;
+    }
+
+    .profile-username {
+        font-family: 'Cinzel', serif;
+        color: var(--gold);
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-meta {
+        font-family: 'Courier New', monospace;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-bio {
+        margin-top: 1rem;
+        line-height: 1.6;
+    }
+
+    .profile-stats {
+        display: flex;
+        gap: 2rem;
+        margin-top: 1rem;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-family: 'Orbitron', sans-serif;
+        color: var(--primary);
+        font-size: 1.2rem;
+    }
+
+    .stat-label {
+        font-family: 'Courier New', monospace;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+
+    .profile-actions {
+        margin-top: 1rem;
+        display: flex;
+        gap: 1rem;
+    }
+
+    .follow-btn, .edit-btn {
+        padding: 0.5rem 1.5rem;
+        font-family: 'Orbitron', sans-serif;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .follow-btn {
+        background: linear-gradient(to right, var(--secondary), var(--primary));
+        border: none;
+        color: white;
+    }
+
+    .follow-btn:hover {
+        background: linear-gradient(to right, var(--primary), var(--secondary));
+    }
+
+    .following {
+        background: linear-gradient(to right, var(--bg-dark), var(--steel)) !important;
+        color: var(--text-muted) !important;
+    }
+
+    .edit-btn {
+        background: none;
+        border: 1px solid var(--steel);
+        color: var(--text-main);
+    }
+
+    .edit-btn:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .profile-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 2rem;
+    }
+
+    .profile-tab {
+        padding: 0.8rem 1.5rem;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s;
+        font-family: 'Orbitron', sans-serif;
+    }
+
+    .profile-tab.active {
+        border-bottom-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .profile-tab:hover:not(.active) {
+        border-bottom-color: var(--text-muted);
+    }
+
+    .posts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .empty-message {
+        text-align: center;
+        padding: 3rem;
+        border: 1px dashed var(--border);
+        margin-top: 2rem;
+        font-family: 'Courier New', monospace;
+        color: var(--text-muted);
+    }
+
+    .empty-message h3 {
+        margin-bottom: 1rem;
+        color: var(--text-main);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="terminal">
+    <div class="profile-container">
+        <!-- Шапка профиля -->
+        <div class="profile-header">
+            <img src="{{ user.avatar or url_for('static', filename='images/default-avatar.png') }}"
+                 class="profile-avatar" alt="{{ user.username }}">
+
+            <div class="profile-info">
+                <h1 class="profile-username">{{ user.username }}</h1>
+                <div class="profile-meta">
+                    Участник с: {{ user.created_at.strftime('%d.%m.%Y') }}
+                </div>
+
+                {% if user.biography %}
+                    <div class="profile-bio">
+                        {{ user.biography }}
+                    </div>
+                {% endif %}
+
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ user.posts|length }}</div>
+                        <div class="stat-label">СООБЩЕНИЙ</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ user.followers.count() }}</div>
+                        <div class="stat-label">ПОДПИСЧИКОВ</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ user.following.count() }}</div>
+                        <div class="stat-label">ПОДПИСОК</div>
+                    </div>
+                </div>
+
+                <div class="profile-actions">
+                    {% if current_user != user %}
+                        <button class="follow-btn {% if current_user.is_following(user) %}following{% endif %}"
+                                onclick="toggleFollow({{ user.id }})">
+                            {% if current_user.is_following(user) %}
+                                ОТПИСАТЬСЯ
+                            {% else %}
+                                ПОДПИСАТЬСЯ
+                            {% endif %}
+                        </button>
+                    {% else %}
+                        <a href="{{ url_for('user_edit', username=user.username) }}" class="edit-btn">
+                            РЕДАКТИРОВАТЬ
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладки профиля -->
+        <div class="profile-tabs">
+            <div class="profile-tab active" onclick="showTab('posts')">
+                СООБЩЕНИЯ
+            </div>
+            <div class="profile-tab" onclick="showTab('likes')">
+                ЛАЙКИ
+            </div>
+        </div>
+
+        <!-- Контент вкладок -->
+        <div id="posts-tab">
+            {% if user.posts %}
+                <div class="posts-grid">
+                    {% for post in user.posts %}
+                        <div class="post-card">
+                            <div class="post-content">
+                                <p>{{ post.text|truncate(100) }}</p>
+                                {% if post.image %}
+                                    <img src="{{ url_for('static', filename='uploads/posts/' + post.image) }}"
+                                         class="post-image" alt="Изображение поста">
+                                {% endif %}
+                            </div>
+                            <div class="post-footer">
+                                <span class="post-date">
+                                    {{ post.created_at.strftime('%d.%m.%Y') }}
+                                </span>
+                                <a href="{{ url_for('detail_post', post_id=post.id) }}" class="comment-btn">
+                                    ☍ {{ post.comments|length }}
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-message">
+                    <h3>СООБЩЕНИЙ НЕ НАЙДЕНО</h3>
+                    <p>Пользователь еще не публиковал сообщений</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div id="likes-tab" style="display: none;">
+            {% if user.likes %}
+                <div class="posts-grid">
+                    {% for like in user.likes %}
+                        {% set post = like.post %}
+                        <div class="post-card">
+                            <div class="post-header">
+                                <img src="{{ post.author.avatar or url_for('static', filename='images/default-avatar.png') }}"
+                                     class="post-avatar" alt="{{ post.author.username }}">
+                                <a href="{{ url_for('show_user_profile', username=post.author.username) }}"
+                                   class="post-author">
+                                    {{ post.author.username }}
+                                </a>
+                            </div>
+                            <div class="post-content">
+                                <p>{{ post.text|truncate(100) }}</p>
+                            </div>
+                            <div class="post-footer">
+                                <span class="post-date">
+                                    {{ post.created_at.strftime('%d.%m.%Y') }}
+                                </span>
+                                <button class="like-btn liked" disabled>
+                                    ♠ {{ post.likes|length }}
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-message">
+                    <h3>ЛАЙКОВ НЕ НАЙДЕНО</h3>
+                    <p>Пользователь еще не ставил лайков</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Переключение вкладок
+    function showTab(tabName) {
+        document.querySelectorAll('.profile-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelectorAll(`.profile-tab`)[tabName === 'posts' ? 0 : 1].classList.add('active');
+
+        document.getElementById('posts-tab').style.display = tabName === 'posts' ? 'block' : 'none';
+        document.getElementById('likes-tab').style.display = tabName === 'likes' ? 'block' : 'none';
+    }
+
+    // Подписка/отписка
+    async function toggleFollow(userId) {
+        if (!{{ 'true' if current_user.is_authenticated else 'false' }}) {
+            window.location.href = "{{ url_for('login') }}";
+            return;
+        }
+
+        const btn = document.querySelector('.follow-btn');
+        const isFollowing = btn.classList.contains('following');
+
+        try {
+            const response = await fetch(`/user/${userId}/follow`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    action: isFollowing ? 'unfollow' : 'follow'
+                })
+            });
+
+            if (response.ok) {
+                btn.classList.toggle('following');
+                btn.textContent = isFollowing ? 'ПОДПИСАТЬСЯ' : 'ОТПИСАТЬСЯ';
+
+                // Обновляем счетчики
+                const followersCount = document.querySelectorAll('.stat-value')[1];
+                followersCount.textContent = isFollowing ?
+                    parseInt(followersCount.textContent) - 1 :
+                    parseInt(followersCount.textContent) + 1;
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+        }
+    }
+</script>
+{% endblock %}

@@ -1,1 +1,257 @@
-2
+{% extends "base.html" %}
+
+{% block title %}РЕДАКТИРОВАНИЕ СООБЩЕНИЯ #{{ post.id }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edit-container {
+        max-width: 700px;
+        margin: 2rem auto;
+        padding: 2rem;
+        border: 1px solid var(--steel);
+        background: rgba(10, 10, 10, 0.8);
+        position: relative;
+    }
+
+    .edit-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(to right, var(--secondary), var(--gold));
+    }
+
+    .edit-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .edit-header h2 {
+        font-family: 'Cinzel', serif;
+        color: var(--gold);
+        letter-spacing: 2px;
+        margin-bottom: 0.5rem;
+    }
+
+    .post-meta {
+        text-align: center;
+        font-family: 'Courier New', monospace;
+        color: var(--text-muted);
+        margin-bottom: 2rem;
+    }
+
+    .edit-form .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .edit-form label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-main);
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+    }
+
+    .edit-form textarea {
+        width: 100%;
+        min-height: 200px;
+        padding: 1rem;
+        background: var(--bg-dark);
+        border: 1px solid var(--steel);
+        color: var(--text-main);
+        font-family: 'Courier New', monospace;
+        line-height: 1.6;
+        resize: vertical;
+    }
+
+    .edit-form textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+    }
+
+    .current-image {
+        margin: 1.5rem 0;
+        text-align: center;
+    }
+
+    .current-image img {
+        max-width: 100%;
+        max-height: 300px;
+        border: 1px solid var(--steel);
+    }
+
+    .image-controls {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .keep-image, .remove-image {
+        padding: 0.5rem 1rem;
+        font-family: 'Courier New', monospace;
+        font-size: 0.8rem;
+        cursor: pointer;
+    }
+
+    .keep-image {
+        background: none;
+        border: 1px solid var(--steel);
+        color: var(--text-main);
+    }
+
+    .remove-image {
+        background: none;
+        border: 1px solid var(--danger);
+        color: var(--danger);
+    }
+
+    .file-upload {
+        margin: 1.5rem 0;
+        position: relative;
+    }
+
+    .file-upload-label {
+        display: block;
+        padding: 1rem;
+        border: 1px dashed var(--steel);
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .file-upload-label:hover {
+        border-color: var(--primary);
+        background: rgba(0, 255, 136, 0.05);
+    }
+
+    .file-upload-input {
+        position: absolute;
+        left: -9999px;
+    }
+
+    .file-name {
+        margin-top: 0.5rem;
+        font-family: 'Courier New', monospace;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        text-align: center;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+    }
+
+    .save-btn {
+        padding: 0.8rem 2.5rem;
+        background: linear-gradient(to right, var(--secondary), var(--gold));
+        border: none;
+        color: var(--bg-dark);
+        font-family: 'Orbitron', sans-serif;
+        font-weight: bold;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .save-btn:hover {
+        background: linear-gradient(to right, var(--gold), var(--secondary));
+    }
+
+    .cancel-btn {
+        padding: 0.8rem 1.5rem;
+        background: none;
+        border: 1px solid var(--steel);
+        color: var(--text-main);
+        font-family: 'Orbitron', sans-serif;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .cancel-btn:hover {
+        border-color: var(--danger);
+        color: var(--danger);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="terminal">
+    <div class="edit-container">
+        <div class="edit-header">
+            <h2>КОРРЕКТИРОВКА СООБЩЕНИЯ</h2>
+            <div class="post-meta">
+                ID: {{ post.id }} | Оригинальная дата: {{ post.created_at.strftime('%d.%m.%Y %H:%M') }}
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('edit_post', post_id=post.id) }}" enctype="multipart/form-data" class="edit-form">
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                <label for="text">▸ ТЕКСТ СООБЩЕНИЯ:</label>
+                <textarea id="text" name="text" required>{{ post.text }}</textarea>
+            </div>
+
+            {% if post.image %}
+                <div class="current-image">
+                    <p>Текущее изображение:</p>
+                    <img src="{{ url_for('static', filename='uploads/posts/' + post.image) }}" alt="Current image">
+                    <div class="image-controls">
+                        <button type="button" class="keep-image" onclick="document.getElementById('keep_image').value = '1'">
+                            СОХРАНИТЬ ИЗОБРАЖЕНИЕ
+                        </button>
+                        <button type="button" class="remove-image" onclick="document.getElementById('remove_image').value = '1'">
+                            УДАЛИТЬ ИЗОБРАЖЕНИЕ
+                        </button>
+                    </div>
+                    <input type="hidden" id="keep_image" name="keep_image" value="0">
+                    <input type="hidden" id="remove_image" name="remove_image" value="0">
+                </div>
+            {% endif %}
+
+            <div class="file-upload">
+                <label for="image" class="file-upload-label">
+                    [+ ЗАМЕНИТЬ ИЗОБРАЖЕНИЕ (ОПЦИОНАЛЬНО)]
+                </label>
+                <input type="file" id="image" name="image" class="file-upload-input" accept="image/*">
+                <div id="file-name" class="file-name"></div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('detail_post', post_id=post.id) }}" class="cancel-btn">ОТМЕНА</a>
+                <button type="submit" class="save-btn">СОХРАНИТЬ ИЗМЕНЕНИЯ</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Отображение имени выбранного файла
+    document.getElementById('image').addEventListener('change', function(e) {
+        const fileName = e.target.files[0] ? e.target.files[0].name : 'Файл не выбран';
+        document.getElementById('file-name').textContent = `Выбрано: ${fileName}`;
+
+        // Автоматически выбираем "заменить изображение" при выборе файла
+        if (e.target.files[0]) {
+            document.getElementById('keep_image').value = '0';
+            document.getElementById('remove_image').value = '0';
+        }
+    });
+
+    // Подтверждение перед выходом
+    window.addEventListener('beforeunload', function(e) {
+        const textarea = document.querySelector('textarea');
+        if (textarea.value !== `{{ post.text }}`) {
+            e.preventDefault();
+            e.returnValue = 'У вас есть несохранённые изменения. Вы уверены, что хотите уйти?';
+        }
+    });
+</script>
+{% endblock %}

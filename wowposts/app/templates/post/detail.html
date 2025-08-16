@@ -1,1 +1,345 @@
-2
+{% extends "base.html" %}
+
+{% block title %}СООБЩЕНИЕ #{{ post.id }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .post-detail-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        border: 1px solid var(--steel);
+        background: rgba(10, 10, 10, 0.8);
+    }
+
+    .post-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .post-avatar {
+        width: 50px;
+        height: 50px;
+        border: 1px solid var(--gold);
+        margin-right: 1rem;
+        object-fit: cover;
+    }
+
+    .post-author {
+        font-family: 'Cinzel', serif;
+        color: var(--gold);
+        text-decoration: none;
+        font-size: 1.2rem;
+    }
+
+    .post-meta {
+        margin-left: auto;
+        text-align: right;
+        font-family: 'Courier New', monospace;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    .post-content {
+        margin: 2rem 0;
+        line-height: 1.8;
+        font-size: 1.1rem;
+    }
+
+    .post-image {
+        max-width: 100%;
+        margin: 1.5rem 0;
+        border: 1px solid var(--steel);
+    }
+
+    .post-actions {
+        display: flex;
+        justify-content: space-between;
+        margin: 2rem 0;
+        padding: 1rem 0;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .like-btn {
+        background: none;
+        border: 1px solid var(--secondary);
+        color: var(--text-main);
+        padding: 0.5rem 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-family: 'Courier New', monospace;
+    }
+
+    .like-btn:hover {
+        background: rgba(106, 0, 244, 0.1);
+    }
+
+    .liked {
+        background: var(--secondary);
+        color: white;
+    }
+
+    .edit-delete-btns {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .edit-btn, .delete-btn {
+        padding: 0.5rem 1.5rem;
+        font-family: 'Orbitron', sans-serif;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .edit-btn {
+        background: none;
+        border: 1px solid var(--steel);
+        color: var(--text-main);
+    }
+
+    .edit-btn:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .delete-btn {
+        background: none;
+        border: 1px solid var(--danger);
+        color: var(--danger);
+    }
+
+    .delete-btn:hover {
+        background: rgba(255, 56, 96, 0.1);
+    }
+
+    .comments-section {
+        margin-top: 3rem;
+    }
+
+    .comments-header {
+        font-family: 'Cinzel', serif;
+        color: var(--gold);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .comments-header::before,
+    .comments-header::after {
+        content: '//';
+        color: var(--primary);
+        margin: 0 0.5rem;
+        font-family: 'Courier New', monospace;
+    }
+
+    .comment-form {
+        margin-bottom: 2rem;
+    }
+
+    .comment-form textarea {
+        width: 100%;
+        min-height: 100px;
+        padding: 1rem;
+        background: var(--bg-dark);
+        border: 1px solid var(--steel);
+        color: var(--text-main);
+        font-family: 'Courier New', monospace;
+        margin-bottom: 1rem;
+    }
+
+    .comment-submit {
+        background: linear-gradient(to right, var(--primary), var(--secondary));
+        border: none;
+        color: white;
+        padding: 0.7rem 2rem;
+        font-family: 'Orbitron', sans-serif;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .comment-submit:hover {
+        background: linear-gradient(to right, var(--secondary), var(--primary));
+    }
+
+    .comment-list {
+        margin-top: 2rem;
+    }
+
+    .comment {
+        margin-bottom: 2rem;
+        padding: 1rem;
+        border-left: 3px solid var(--secondary);
+        background: rgba(18, 18, 18, 0.5);
+    }
+
+    .comment-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .comment-author {
+        font-family: 'Cinzel', serif;
+        color: var(--gold);
+        text-decoration: none;
+        font-size: 1rem;
+    }
+
+    .comment-meta {
+        margin-left: auto;
+        font-family: 'Courier New', monospace;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+
+    .comment-actions {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .comment-actions a {
+        color: var(--text-muted);
+        text-decoration: none;
+        margin-right: 1rem;
+        transition: all 0.3s;
+    }
+
+    .comment-actions a:hover {
+        color: var(--primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="terminal">
+    <div class="post-detail-container">
+        <!-- Заголовок поста -->
+        <div class="post-header">
+            <img src="{{ post.author.avatar or url_for('static', filename='images/default-avatar.png') }}"
+                 class="post-avatar" alt="{{ post.author.username }}">
+            <a href="{{ url_for('show_user_profile', username=post.author.username) }}" class="post-author">
+                {{ post.author.username }}
+            </a>
+            <div class="post-meta">
+                {{ post.created_at.strftime('%d.%m.%Y %H:%M') }}<br>
+                ID: {{ post.id }}
+            </div>
+        </div>
+
+        <!-- Содержимое поста -->
+        <div class="post-content">
+            <p>{{ post.text }}</p>
+            {% if post.image %}
+                <img src="{{ url_for('static', filename='uploads/posts/' + post.image) }}"
+                     class="post-image" alt="Изображение поста">
+            {% endif %}
+        </div>
+
+        <!-- Действия с постом -->
+        <div class="post-actions">
+            <button class="like-btn {% if current_user.is_authenticated and post in current_user.likes %}liked{% endif %}"
+                    data-post-id="{{ post.id }}" id="likeButton">
+                ♠ ЛАЙК <span id="likeCount">{{ post.likes|length }}</span>
+            </button>
+
+            {% if current_user == post.author or current_user.is_admin %}
+                <div class="edit-delete-btns">
+                    <a href="{{ url_for('edit_post', post_id=post.id) }}" class="edit-btn">
+                        РЕДАКТИРОВАТЬ
+                    </a>
+                    <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST" style="display: inline;">
+                        <button type="submit" class="delete-btn"
+                                onclick="return confirm('УДАЛИТЬ СООБЩЕНИЕ НАВСЕГДА?')">
+                            УДАЛИТЬ
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Секция комментариев -->
+        <div class="comments-section">
+            <h3 class="comments-header">КОММЕНТАРИИ</h3>
+
+            <!-- Форма добавления комментария -->
+            {% if current_user.is_authenticated %}
+                <form method="POST" action="{{ url_for('add_comment', post_id=post.id) }}" class="comment-form">
+                    {{ form.hidden_tag() }}
+                    <textarea name="text" placeholder="ВАШ КОММЕНТАРИЙ..." required></textarea>
+                    <button type="submit" class="comment-submit">ОТПРАВИТЬ</button>
+                </form>
+            {% else %}
+                <p>Для комментирования <a href="{{ url_for('login') }}">требуется авторизация</a>.</p>
+            {% endif %}
+
+            <!-- Список комментариев -->
+            <div class="comment-list">
+                {% for comment in post.comments %}
+                    <div class="comment">
+                        <div class="comment-header">
+                            <a href="{{ url_for('show_user_profile', username=comment.author.username) }}"
+                               class="comment-author">
+                                {{ comment.author.username }}
+                            </a>
+                            <div class="comment-meta">
+                                {{ comment.created_at.strftime('%d.%m.%Y %H:%M') }}
+                            </div>
+                        </div>
+                        <p>{{ comment.text }}</p>
+
+                        {% if current_user == comment.author or current_user.is_admin %}
+                            <div class="comment-actions">
+                                <a href="{{ url_for('edit_comment', comment_id=comment.id) }}">✎ Редактировать</a>
+                                <a href="{{ url_for('delete_comment', comment_id=comment.id) }}"
+                                   onclick="return confirm('УДАЛИТЬ КОММЕНТАРИЙ?')">✖ Удалить</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Обработка лайков через AJAX
+    document.getElementById('likeButton').addEventListener('click', async function() {
+        if (!{{ 'true' if current_user.is_authenticated else 'false' }}) {
+            window.location.href = "{{ url_for('login') }}";
+            return;
+        }
+
+        const postId = this.dataset.postId;
+        const likeCount = document.getElementById('likeCount');
+
+        try {
+            const response = await fetch(`/like/${postId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.liked) {
+                this.classList.add('liked');
+            } else {
+                this.classList.remove('liked');
+            }
+
+            likeCount.textContent = data.likes_count;
+
+        } catch (error) {
+            console.error('Ошибка:', error);
+        }
+    });
+</script>
+{% endblock %}

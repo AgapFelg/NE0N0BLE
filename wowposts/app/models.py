@@ -1,20 +1,20 @@
 # импорт модуля для работы с SQLALCHEMY
-from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
 # импорт дейт тайм для тайм стампов
 from datetime import datetime
+from flask_sqlalchemy import SQLAlchemy
 
-# инициализация экземпляра БД
 db = SQLAlchemy()
 
 # модель пользователей
-class User(db.model):
+class User(db.Model, UserMixin):
     __tablename__ = 'users'
     # основные колонки
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
-    created_at = db.Column(db.Datetime, default=datetime.now)
+    created_at = db.Column(db.DateTime, default=datetime.now)
     avatar = db.Column(db.String(200)) # сюда надо будет сувать путь к файлу аватара
     biography = db.Column(db.String(3000))
 
@@ -32,7 +32,7 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.Text, nullable=False)
     image = db.Column(db.String(200)) # сюда надо будет сувать путь к файлу имейджа в посте
-    created_at = db.Column(db.Datetime, default=datetime.now, index=True)
+    created_at = db.Column(db.DateTime, default=datetime.now, index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     # отношения
@@ -54,10 +54,10 @@ class Like(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), nullable=False)
-    created_at = db.Column(db.Datetime, default=datetime.now)
+    created_at = db.Column(db.DateTime, default=datetime.now)
 
     # ограничение, чтобы один юзер мог лайкнуть пост только один раз
-    __teble_args__ = (db.UniqueConstraint('user_id', 'post_id', name='unique_like'))
+    __teble_args__ = (db.UniqueConstraint('user_id', 'post_id', name='unique_like'),)
 
 # модель для подписок
 class Follow(db.Model):
@@ -65,7 +65,7 @@ class Follow(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     follower_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     followed_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    created_at = db.Column(db.Datetime, default=datetime.now)
+    created_at = db.Column(db.DateTime, default=datetime.now)
 
     # ограничение, чтобы один юзер мог иметь только одну подписпку на другого пользователя (чтобы Леша не был подписан на Петю 5 раз)
-    __table_args__ = (db.UniqueConstraint('follower_id', 'followed_id', name='unique_follow'))
+    __table_args__ = (db.UniqueConstraint('follower_id', 'followed_id', name='unique_follow'),)

@@ -2,28 +2,68 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, abort
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect
 from config import Config
 # импорт веркзеурга
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-# импорт моделей
-from models import User, Post, Comment, Like, Follow
 from datetime import datetime
 import os
+from models import db
+# импорт модулей, которые нужны для создания форм
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField
+from wtforms.validators import DataRequired
 
-# создание экземпляра конфига
-config = Config()
-# создание экземпляра приложения
-app = Flask(__name__)
-# конфигурация приложения
-app.config['SQLALCHEMY_DATABASE_URI'] = config.database_uri
-app.config['SECRET_KEY'] = config.secret_key
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
-# инициализация БД
-db = SQLAlchemy(app)
-# инициализация логин манагера
-login_manager = LoginManager(app)
-login_manager.login_view = 'login'
+# Сначала создаем экземпляры расширений
+login_manager = LoginManager()
+csrf = CSRFProtect()
+
+
+def create_app():
+    app = Flask(__name__)
+
+    # Загрузка конфигурации
+    config = Config()
+    app.config['SQLALCHEMY_DATABASE_URI'] = config.database_uri
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SECRET_KEY'] = config.secret_key
+    app.config['UPLOAD_FOLDER'] = 'static/uploads'
+
+    # Инициализация расширений с приложением
+    db.init_app(app)
+    login_manager.init_app(app)
+    login_manager.login_view = 'login'
+
+    csrf.init_app(app)
+
+    return app
+
+
+# !!!!#!!!!#!!!!#
+# Ф О Р М Ы, ПОТОМ ВЫНЕСТИ В ОТДЕЛЬНЫЙ ФАЙЛ
+# !!!!#!!!!#!!!!#
+# форма для логина
+class LoginForm(FlaskForm)
+    email = StringField('Email', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+
+# Создаем приложение
+app = create_app()
+
+# Теперь импортируем модели после создания app и db
+from models import User, Post, Comment, Like, Follow
+
+@app.shell_context_processor
+def make_shell_context():
+    return{
+        'db': db,
+        'User': User,
+        'Post': Post,
+        'Comment': Comment,
+        'Like': Like,
+        'Follow': Follow
+    }
 
 #МАРШРУТ ДЛЯ КАСТОМНЫХ ОШИБОК
 #--------ДОБАВИТЬ МАРШРУТ
@@ -282,7 +322,7 @@ def page_not_found(e):
 def forbidden(e):
     return render_template('errors/403.html'), 403
 
-@app.errorandler(500)
+@app.errorhandler(500)
 def internal_error(e):
     db.session.rollback()
     return render_template('errors/500.html'), 500
@@ -290,4 +330,6 @@ def internal_error(e):
 
 # запуск приложения
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)

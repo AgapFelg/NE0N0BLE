@@ -1,1 +1,88 @@
-2
+{% extends "base.html" %}
+
+{% block title %}ДОСТУП ЗАПРЕЩЁН{% endblock %}
+
+{% block extra_css %}
+<style>
+    .error-container {
+        max-width: 600px;
+        margin: 4rem auto;
+        padding: 2rem;
+        border: 1px solid var(--danger);
+        background: rgba(10, 10, 10, 0.9);
+        text-align: center;
+    }
+
+    .error-code {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 5rem;
+        color: var(--danger);
+        margin-bottom: 1rem;
+        text-shadow: 0 0 10px rgba(255, 56, 96, 0.5);
+    }
+
+    .error-title {
+        font-family: 'Cinzel', serif;
+        color: var(--gold);
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+
+    .error-message {
+        font-family: 'Courier New', monospace;
+        color: var(--text-main);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .error-actions {
+        margin-top: 2rem;
+    }
+
+    .home-link {
+        padding: 0.8rem 2rem;
+        background: linear-gradient(to right, var(--bg-dark), var(--secondary));
+        border: none;
+        color: white;
+        font-family: 'Orbitron', sans-serif;
+        text-decoration: none;
+        letter-spacing: 1px;
+        transition: all 0.3s;
+    }
+
+    .home-link:hover {
+        background: linear-gradient(to right, var(--secondary), var(--bg-dark));
+    }
+
+    .access-level {
+        margin-top: 2rem;
+        padding: 1rem;
+        border: 1px dashed var(--danger);
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="terminal">
+    <div class="error-container">
+        <div class="error-code">403</div>
+        <h1 class="error-title">ДОСТУП ОГРАНИЧЕН</h1>
+
+        <div class="error-message">
+            <p>Ваш текущий уровень доступа не позволяет просматривать этот ресурс.</p>
+            <p>Требуется авторизация уровня <span class="aristocrat">GOLD CLEARANCE</span>.</p>
+        </div>
+
+        <div class="access-level">
+            ТЕКУЩИЙ УРОВЕНЬ: <strong>{{ 'AUTHENTICATED' if current_user.is_authenticated else 'GUEST' }}</strong>
+        </div>
+
+        <div class="error-actions">
+            <a href="{{ url_for('home') }}" class="home-link">НА ГЛАВНУЮ</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

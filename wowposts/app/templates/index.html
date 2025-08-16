@@ -1,1 +1,216 @@
-2
+{% extends "base.html" %}
+
+{% block title %}ГЛАВНЫЙ ТЕРМИНАЛ{% endblock %}
+
+{% block extra_css %}
+<style>
+    .post-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .post-card {
+        background: linear-gradient(145deg, #121212, #0a0a0a);
+        border: 1px solid var(--border);
+        padding: 1.5rem;
+        position: relative;
+        transition: all 0.3s;
+    }
+
+    .post-card:hover {
+        border-color: var(--primary);
+        box-shadow: 0 0 15px rgba(0, 255, 136, 0.1);
+    }
+
+    .post-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid var(--steel);
+        padding-bottom: 0.5rem;
+    }
+
+    .post-avatar {
+        width: 40px;
+        height: 40px;
+        border: 1px solid var(--gold);
+        margin-right: 1rem;
+        object-fit: cover;
+    }
+
+    .post-author {
+        font-family: 'Cinzel', serif;
+        color: var(--gold);
+        text-decoration: none;
+        font-size: 1.1rem;
+    }
+
+    .post-content {
+        margin: 1rem 0;
+        line-height: 1.6;
+    }
+
+    .post-image {
+        width: 100%;
+        margin: 1rem 0;
+        border: 1px solid var(--steel);
+    }
+
+    .post-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1.5rem;
+        border-top: 1px solid var(--border);
+        padding-top: 0.5rem;
+    }
+
+    .post-date {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        font-family: 'Courier New', monospace;
+    }
+
+    .like-btn {
+        background: none;
+        border: 1px solid var(--secondary);
+        color: var(--text-main);
+        padding: 0.3rem 0.8rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-family: 'Courier New', monospace;
+    }
+
+    .like-btn:hover {
+        background: rgba(106, 0, 244, 0.1);
+        color: var(--secondary);
+    }
+
+    .liked {
+        background: var(--secondary);
+        color: white;
+    }
+
+    .new-post-btn {
+        display: block;
+        width: fit-content;
+        margin: 2rem auto;
+        padding: 0.8rem 2rem;
+        background: linear-gradient(to right, var(--bg-dark), var(--secondary));
+        border: 1px solid var(--secondary);
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        transition: all 0.3s;
+    }
+
+    .new-post-btn:hover {
+        background: linear-gradient(to right, var(--secondary), var(--bg-dark));
+        box-shadow: 0 0 15px rgba(106, 0, 244, 0.3);
+    }
+
+    .empty-feed {
+        text-align: center;
+        padding: 3rem;
+        border: 1px dashed var(--border);
+        margin-top: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="terminal">
+    <!-- Блок создания нового поста (только для авторизованных) -->
+    {% if current_user.is_authenticated %}
+        <a href="{{ url_for('create_post') }}" class="new-post-btn">
+            [ + НОВОЕ СООБЩЕНИЕ ]
+        </a>
+    {% endif %}
+
+    <!-- Лента постов -->
+    {% if posts.items %}
+        <div class="post-grid">
+            {% for post in posts.items %}
+                <div class="post-card">
+                    <div class="post-header">
+                        <img src="{{ post.author.avatar or url_for('static', filename='images/default-avatar.png') }}"
+                             class="post-avatar" alt="{{ post.author.username }}">
+                        <a href="{{ url_for('show_user_profile', username=post.author.username) }}"
+                           class="post-author">
+                            {{ post.author.username }}
+                        </a>
+                    </div>
+
+                    <div class="post-content">
+                        <p>{{ post.text }}</p>
+                        {% if post.image %}
+                            <img src="{{ url_for('static', filename='uploads/posts/' + post.image) }}"
+                                 class="post-image" alt="Изображение поста">
+                        {% endif %}
+                    </div>
+
+                    <div class="post-footer">
+                        <span class="post-date">
+                            {{ post.created_at.strftime('%d.%m.%Y %H:%M') }}
+                        </span>
+                        <button class="like-btn {% if current_user.is_authenticated and post in current_user.likes %}liked{% endif %}"
+                                data-post-id="{{ post.id }}">
+                            ♠ {{ post.likes|length }}
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Пагинация -->
+        <div class="pagination">
+            {% if posts.has_prev %}
+                <a href="{{ url_for('home', page=posts.prev_num) }}" class="pagination-link">← ПРЕД</a>
+            {% endif %}
+
+            <span class="current-page">
+                СТРАНИЦА {{ posts.page }} / {{ posts.pages }}
+            </span>
+
+            {% if posts.has_next %}
+                <a href="{{ url_for('home', page=posts.next_num) }}" class="pagination-link">СЛЕД →</a>
+            {% endif %}
+        </div>
+
+    {% else %}
+        <div class="empty-feed">
+            <h3>СИГНАЛ НЕ ОБНАРУЖЕН</h3>
+            <p>Здесь пока нет сообщений. Будьте первым!</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.like-btn').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const postId = this.dataset.postId;
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+                try {
+                    const response = await fetch(`/like/${postId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        }
+                    });
+
+                    // Обработка ответа...
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

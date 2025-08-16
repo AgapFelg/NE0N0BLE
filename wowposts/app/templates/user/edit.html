@@ -1,1 +1,301 @@
-2
+{% extends "base.html" %}
+
+{% block title %}РЕДАКТИРОВАНИЕ ПРОФИЛЯ: {{ current_user.username }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-edit-container {
+        max-width: 700px;
+        margin: 2rem auto;
+        padding: 2rem;
+        border: 1px solid var(--steel);
+        background: rgba(10, 10, 10, 0.8);
+        position: relative;
+    }
+
+    .profile-edit-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(to right, var(--gold), var(--primary));
+    }
+
+    .profile-edit-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .profile-edit-header h2 {
+        font-family: 'Cinzel', serif;
+        color: var(--gold);
+        letter-spacing: 2px;
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-edit-header p {
+        color: var(--text-muted);
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+    }
+
+    .avatar-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .current-avatar {
+        width: 120px;
+        height: 120px;
+        border: 2px solid var(--gold);
+        border-radius: 2px;
+        object-fit: cover;
+        margin-bottom: 1rem;
+    }
+
+    .avatar-controls {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .avatar-upload-label {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+    }
+
+    .avatar-upload-btn, .avatar-remove-btn {
+        padding: 0.5rem 1.5rem;
+        font-family: 'Orbitron', sans-serif;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .avatar-upload-btn {
+        background: linear-gradient(to right, var(--secondary), var(--primary));
+        border: none;
+        color: white;
+    }
+
+    .avatar-upload-btn:hover {
+        background: linear-gradient(to right, var(--primary), var(--secondary));
+    }
+
+    .avatar-remove-btn {
+        background: none;
+        border: 1px solid var(--danger);
+        color: var(--danger);
+    }
+
+    .avatar-remove-btn:hover {
+        background: rgba(255, 56, 96, 0.1);
+    }
+
+    .avatar-upload-input {
+        position: absolute;
+        left: -9999px;
+    }
+
+    .edit-form .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .edit-form label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-main);
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+    }
+
+    .edit-form input, .edit-form textarea {
+        width: 100%;
+        padding: 0.8rem;
+        background: var(--bg-dark);
+        border: 1px solid var(--steel);
+        color: var(--text-main);
+        font-family: 'Courier New', monospace;
+    }
+
+    .edit-form textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .edit-form input:focus, .edit-form textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+    }
+
+    .save-btn {
+        padding: 0.8rem 2.5rem;
+        background: linear-gradient(to right, var(--gold), var(--primary));
+        border: none;
+        color: var(--bg-dark);
+        font-family: 'Orbitron', sans-serif;
+        font-weight: bold;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .save-btn:hover {
+        background: linear-gradient(to right, var(--primary), var(--gold));
+    }
+
+    .cancel-btn {
+        padding: 0.8rem 1.5rem;
+        background: none;
+        border: 1px solid var(--steel);
+        color: var(--text-main);
+        font-family: 'Orbitron', sans-serif;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .cancel-btn:hover {
+        border-color: var(--danger);
+        color: var(--danger);
+    }
+
+    .password-change {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .password-change h3 {
+        font-family: 'Cinzel', serif;
+        color: var(--gold);
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="terminal">
+    <div class="profile-edit-container">
+        <div class="profile-edit-header">
+            <h2>РЕДАКТИРОВАНИЕ ПРОФИЛЯ</h2>
+            <p>ID: {{ current_user.id }} | Уровень доступа: <span class="aristocrat">SILVER</span></p>
+        </div>
+
+        <form method="POST" action="{{ url_for('user_edit', username=current_user.username) }}" enctype="multipart/form-data" class="edit-form">
+            {{ form.hidden_tag() }}
+
+            <!-- Секция аватара -->
+            <div class="avatar-section">
+                <img src="{{ current_user.avatar or url_for('static', filename='images/default-avatar.png') }}"
+                     class="current-avatar" id="avatar-preview">
+
+                <div class="avatar-controls">
+                    <label class="avatar-upload-label">
+                        <span class="avatar-upload-btn">ВЫБРАТЬ ФАЙЛ</span>
+                        <input type="file" id="avatar" name="avatar" class="avatar-upload-input" accept="image/*">
+                    </label>
+                    {% if current_user.avatar %}
+                        <button type="button" class="avatar-remove-btn" onclick="document.getElementById('remove_avatar').value = '1'">
+                            УДАЛИТЬ
+                        </button>
+                        <input type="hidden" id="remove_avatar" name="remove_avatar" value="0">
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Основная информация -->
+            <div class="form-group">
+                <label for="username">▸ ИМЯ ПОЛЬЗОВАТЕЛЯ:</label>
+                <input type="text" id="username" name="username" value="{{ current_user.username }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="biography">▸ БИОГРАФИЯ:</label>
+                <textarea id="biography" name="biography">{{ current_user.biography or '' }}</textarea>
+            </div>
+
+            <!-- Смена пароля -->
+            <div class="password-change">
+                <h3>▸ СМЕНА ПАРОЛЯ (ОПЦИОНАЛЬНО)</h3>
+                <div class="form-group">
+                    <label for="current_password">▸ ТЕКУЩИЙ ПАРОЛЬ:</label>
+                    <input type="password" id="current_password" name="current_password">
+                </div>
+                <div class="form-group">
+                    <label for="new_password">▸ НОВЫЙ ПАРОЛЬ:</label>
+                    <input type="password" id="new_password" name="new_password">
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">▸ ПОДТВЕРЖДЕНИЕ:</label>
+                    <input type="password" id="confirm_password" name="confirm_password">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('show_user_profile', username=current_user.username) }}" class="cancel-btn">
+                    ОТМЕНА
+                </a>
+                <button type="submit" class="save-btn">
+                    СОХРАНИТЬ ИЗМЕНЕНИЯ
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Превью аватара
+    document.getElementById('avatar').addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('avatar-preview').src = event.target.result;
+                if (document.getElementById('remove_avatar')) {
+                    document.getElementById('remove_avatar').value = '0';
+                }
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+
+    // Подтверждение перед выходом
+    window.addEventListener('beforeunload', function(e) {
+        const form = document.querySelector('form');
+        const formData = new FormData(form);
+        let hasChanges = false;
+
+        // Проверяем изменения в основных полях
+        if (formData.get('username') !== '{{ current_user.username }}' ||
+            formData.get('biography') !== '{{ current_user.biography or '' }}') {
+            hasChanges = true;
+        }
+
+        // Проверяем загрузку нового аватара
+        if (document.getElementById('avatar').files.length > 0) {
+            hasChanges = true;
+        }
+
+        // Проверяем изменение пароля
+        if (formData.get('new_password') || formData.get('confirm_password')) {
+            hasChanges = true;
+        }
+
+        if (hasChanges) {
+            e.preventDefault();
+            e.returnValue = 'У вас есть несохранённые изменения. Вы уверены, что хотите уйти?';
+        }
+    });
+</script>
+{% endblock %}

@@ -1,1 +1,54 @@
-2
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta chraset="UTF-8">
+    <meta name="viewport" content="width=device-width, inital-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{% block title %}NE0N0BLE{% endblock %}</title>
+    <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="cyber-military">
+    <!-- shapka -->
+    <header class="site-header">
+        <div class="header-grid">
+            <nav class="main-nav">
+                <a href="{{ url_for('home') }}" class="nav-logo">/NE0N0BLE/</a>
+                <div class="nav-links">
+                    <a href="{{ url_for('home') }}" class="nav-link">ГЛАВНАЯ</a>
+                    <a href="{{ url_for('feed') }}" class="nav-link">ЛЕНТА</a>
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('show_user_profile', username=current.username) }}" class="nav-link">ПРОФИЛЬ</a>
+                        <a href="{{ url_for('logout') }}" class="nav-link">ВЫХОД</a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="nav-link">ВОЙТИ</a>
+                    {% endif %}
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- типо терминал -->
+    <main class="terminal">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="crypto-footer">
+        <div class="footer-content">
+            <span class="crypto-signal">[ TRANSMISSION_END ]</span>
+            <span class="gold-divider">|||</span>
+            <span class="copyright">2025 NE0N0BLE</span>
+        </div>
+    </footer>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

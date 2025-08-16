@@ -1,1 +1,102 @@
-2
+{% extends "base.html" %}
+
+{% block title %}РЕСУРС НЕ НАЙДЕН{% endblock %}
+
+{% block extra_css %}
+<style>
+    .error-container {
+        max-width: 600px;
+        margin: 4rem auto;
+        padding: 2rem;
+        border: 1px solid var(--secondary);
+        background: rgba(10, 10, 10, 0.9);
+        text-align: center;
+    }
+
+    .error-code {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 5rem;
+        color: var(--secondary);
+        margin-bottom: 1rem;
+        text-shadow: 0 0 10px rgba(106, 0, 244, 0.5);
+    }
+
+    .error-title {
+        font-family: 'Cinzel', serif;
+        color: var(--gold);
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+
+    .error-message {
+        font-family: 'Courier New', monospace;
+        color: var(--text-main);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .scan-animation {
+        margin: 2rem 0;
+        font-family: 'Courier New', monospace;
+        color: var(--primary);
+        white-space: nowrap;
+        overflow: hidden;
+        border-right: 2px solid var(--primary);
+        animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+    }
+
+    @keyframes typing {
+        from { width: 0 }
+        to { width: 100% }
+    }
+
+    @keyframes blink-caret {
+        from, to { border-color: transparent }
+        50% { border-color: var(--primary) }
+    }
+
+    .error-actions {
+        margin-top: 2rem;
+    }
+
+    .home-link {
+        padding: 0.8rem 2rem;
+        background: linear-gradient(to right, var(--primary), var(--secondary));
+        border: none;
+        color: white;
+        font-family: 'Orbitron', sans-serif;
+        text-decoration: none;
+        letter-spacing: 1px;
+        transition: all 0.3s;
+    }
+
+    .home-link:hover {
+        background: linear-gradient(to right, var(--secondary), var(--primary));
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="terminal">
+    <div class="error-container">
+        <div class="error-code">404</div>
+        <h1 class="error-title">СИГНАЛ НЕ ОБНАРУЖЕН</h1>
+
+        <div class="error-message">
+            <p>Запрошенный ресурс не существует или был перемещён.</p>
+            <p>Попробуйте проверить адрес или воспользуйтесь поиском.</p>
+        </div>
+
+        <div class="scan-animation">
+            SCANNING DATABASE... NO MATCH FOUND
+        </div>
+
+        <div class="error-actions">
+            <a href="{{ url_for('home') }}" class="home-link">НА ГЛАВНУЮ</a>
+            <a href="{{ url_for('search') }}" class="home-link" style="background: linear-gradient(to right, var(--bg-dark), var(--steel)); margin-left: 1rem;">
+                ПОИСК
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

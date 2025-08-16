@@ -1,1 +1,186 @@
-2
+{% extends "base.html" %}
+
+{% block title %}ПРИВАТНАЯ ЛЕНТА{% endblock %}
+
+{% block extra_css %}
+<style>
+    .command-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding: 1rem;
+        border-bottom: 1px solid var(--secondary);
+        position: relative;
+    }
+
+    .command-header::before,
+    .command-header::after {
+        content: '✧';
+        color: var(--gold);
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.5rem;
+    }
+
+    .command-header::before {
+        left: 2rem;
+    }
+
+    .command-header::after {
+        right: 2rem;
+    }
+
+    .feed-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .access-denied {
+        text-align: center;
+        padding: 3rem;
+        border: 1px dashed var(--danger);
+        margin-top: 2rem;
+    }
+
+    .access-denied h3 {
+        color: var(--danger);
+        font-family: 'Courier New', monospace;
+        text-transform: uppercase;
+    }
+
+    .follow-promo {
+        text-align: center;
+        margin: 2rem 0;
+        padding: 1.5rem;
+        background: rgba(106, 0, 244, 0.05);
+        border: 1px solid var(--secondary);
+    }
+
+    .follow-promo a {
+        color: var(--gold);
+        text-decoration: none;
+        border-bottom: 1px dotted var(--gold);
+    }
+
+    .empty-feed {
+        text-align: center;
+        padding: 3rem;
+        border: 1px dashed var(--border);
+        margin-top: 2rem;
+        font-family: 'Courier New', monospace;
+    }
+
+    .empty-feed h3 {
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+    }
+
+    /* Наследуем стили карточек из index.html */
+    .post-card {
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="terminal">
+    <div class="command-header">
+        <h2>// ЛИЧНЫЙ КАНАЛ СВЯЗИ //</h2>
+        <p class="text-muted">Сообщения от ваших доверенных контактов</p>
+    </div>
+
+    {% if not current_user.is_authenticated %}
+        <div class="access-denied">
+            <h3>ДОСТУП ЗАПРЕЩЁН</h3>
+            <p>Требуется аутентификация уровня <span class="aristocrat">GOLD CLEARANCE</span></p>
+            <a href="{{ url_for('login') }}" class="btn military-btn">ПОДТВЕРДИТЬ ИДЕНТИФИКАЦИЮ</a>
+        </div>
+    {% else %}
+        <div class="feed-container">
+            {% if current_user.following.count() == 0 %}
+                <div class="follow-promo">
+                    <h3 class="aristocrat">ВНИМАНИЕ: НЕТ АКТИВНЫХ КАНАЛОВ</h3>
+                    <p>Вы не подписаны ни на одного пользователя. Найдите союзников в <a href="{{ url_for('home') }}">главном терминале</a>.</p>
+                </div>
+            {% elif posts|length == 0 %}
+                <div class="empty-feed">
+                    <h3>◈ ◈ ◈</h3>
+                    <p>Ваши контакты пока не отправляли сообщений.</p>
+                    <p>Ожидание входящего сигнала...</p>
+                </div>
+            {% else %}
+                {% for post in posts %}
+                    <div class="post-card">
+                        <div class="post-header">
+                            <img src="{{ post.author.avatar or url_for('static', filename='images/default-avatar.png') }}"
+                                 class="post-avatar" alt="{{ post.author.username }}">
+                            <a href="{{ url_for('show_user_profile', username=post.author.username) }}"
+                               class="post-author">
+                                {{ post.author.username }}
+                            </a>
+                            <span class="post-badge">◆ ПОДПИСКА ◆</span>
+                        </div>
+
+                        <div class="post-content">
+                            <p>{{ post.text }}</p>
+                            {% if post.image %}
+                                <img src="{{ url_for('static', filename='uploads/posts/' + post.image) }}"
+                                     class="post-image" alt="Изображение поста">
+                            {% endif %}
+                        </div>
+
+                        <div class="post-footer">
+                            <span class="post-date">
+                                {{ post.created_at.strftime('%d.%m.%Y %H:%M') }}
+                            </span>
+                            <div class="post-actions">
+                                <button class="like-btn {% if current_user.is_authenticated and post in current_user.likes %}liked{% endif %}"
+                                        data-post-id="{{ post.id }}">
+                                    ♠ {{ post.likes|length }}
+                                </button>
+                                <a href="{{ url_for('detail_post', post_id=post.id) }}" class="comment-btn">
+                                    ☍ {{ post.comments|length }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Наследуем обработчик лайков из index.html
+    document.querySelectorAll('.like-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const postId = this.dataset.postId;
+
+            try {
+                const response = await fetch(`/like/${postId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.liked) {
+                    this.classList.add('liked');
+                } else {
+                    this.classList.remove('liked');
+                }
+
+                this.innerHTML = `♠ ${data.likes_count}`;
+
+            } catch (error) {
+                console.error('Ошибка:', error);
+            }
+        });
+    });
+</script>
+{% endblock %}
