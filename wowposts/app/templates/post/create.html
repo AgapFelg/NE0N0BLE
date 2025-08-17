@@ -161,7 +161,7 @@
     <div class="create-container">
         <div class="create-header">
             <h2>НОВОЕ ЗАШИФРОВАННОЕ СООБЩЕНИЕ</h2>
-            <p>ID СЕССИИ: {{ current_user.id }}_{{ "%04d" | format(range(1, 9999) | random }}</p>
+            <p>ID СЕССИИ: {{ current_user.id }}_{{ "%04d"|format(range(1, 9999)|random) }}</p>
         </div>
 
         <form method="POST" action="{{ url_for('create_post') }}" enctype="multipart/form-data" class="create-form">
@@ -169,29 +169,23 @@
 
             <div class="form-group">
                 <label for="text">▸ ТЕКСТ СООБЩЕНИЯ:</label>
-                <textarea id="text" name="text" required placeholder="Введите текст сообщения..."></textarea>
+                {{ form.text(class="form-control", placeholder="Введите текст сообщения...") }}
+                {% for error in form.text.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                {% endfor %}
             </div>
 
             <div class="file-upload">
                 <label for="image" class="file-upload-label">
                     [+ ПРИКРЕПИТЬ ИЗОБРАЖЕНИЕ (ОПЦИОНАЛЬНО)]
                 </label>
-                <input type="file" id="image" name="image" class="file-upload-input" accept="image/*">
+                {{ form.image(class="file-upload-input") }}
                 <div id="file-name" class="file-name"></div>
-            </div>
-
-            <div class="rules">
-                <h4>▸ ПРАВИЛА ПУБЛИКАЦИИ:</h4>
-                <ul>
-                    <li>Запрещены сообщения, нарушающие Кодекс NE0N0BLE</li>
-                    <li>Максимальный размер изображения: 5MB</li>
-                    <li>Поддерживаемые форматы: JPG, PNG</li>
-                </ul>
             </div>
 
             <div class="form-actions">
                 <a href="{{ url_for('home') }}" class="cancel-btn">ОТМЕНА</a>
-                <button type="submit" class="submit-btn">ОТПРАВИТЬ</button>
+                {{ form.submit(class="submit-btn") }}
             </div>
         </form>
     </div>

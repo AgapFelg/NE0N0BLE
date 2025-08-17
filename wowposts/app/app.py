@@ -1,5 +1,5 @@
 # импорт необходимых модулей
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, abort
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, abort, current_app
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
@@ -12,8 +12,9 @@ import os
 from models import db
 # импорт модулей, которые нужны для создания форм
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField
-from wtforms.validators import DataRequired
+from wtforms import StringField, PasswordField, SubmitField, TextAreaField, FileField
+from wtforms.validators import DataRequired, Email, Length, EqualTo, Optional
+import time
 
 # Сначала создаем экземпляры расширений
 login_manager = LoginManager()
@@ -44,9 +45,36 @@ def create_app():
 # Ф О Р М Ы, ПОТОМ ВЫНЕСТИ В ОТДЕЛЬНЫЙ ФАЙЛ
 # !!!!#!!!!#!!!!#
 # форма для логина
-class LoginForm(FlaskForm)
-    email = StringField('Email', validators=[DataRequired()])
+class LoginForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('ПОДТВЕРДИТЬ')
+
+# форма для регистрации
+class RegistrationForm(FlaskForm):
+    username = StringField('Имя', validators=[DataRequired(), Length(min=3, max=20)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Пароль', validators=[DataRequired(), Length(min=8)])
+    confirm_password = PasswordField('Нужно повторить пароль', validators=[DataRequired(), EqualTo('password', message="Пароли должны совпадать")])
+    submit = SubmitField('Зарегистрироваться')
+
+# форма для создания поста
+class CreatePostForm(FlaskForm):
+    text = TextAreaField('ТЕКСТ СООБЩЕНИЯ', validators=[DataRequired()])
+    image = FileField('ИЗОБРАЖЕНИЕ')
+    submit = SubmitField('ОПУБЛИКОВАТЬ СООБЩЕНИЕ')
+
+# форма редоактирования профиля
+class EditProfileForm(FlaskForm):
+    username = StringField('Имя пользователя', validators=[
+        DataRequired(message="Обязательное поле"),
+        Length(min=3, max=25, message="Длина от 3 до 25 символов")
+    ])
+    biography = TextAreaField('Биография', validators=[Optional()])
+    avatar = FileField('Аватар', validators=[Optional()])
+    current_password = PasswordField('Текущий пароль', validators=[Optional()])
+    new_password = PasswordField('Новый пароль', validators=[Optional()])
+    confirm_password = PasswordField('Подтверждение пароля', validators=[Optional()])
 
 # Создаем приложение
 app = create_app()
@@ -85,13 +113,14 @@ def load_user(user_id):
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
-    if request.method == 'POST':
-        user = User.query.filter_by(email=request.form['email']).first()
-        if user and check_password_hash(user.password_hash, request.form['password']):
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and check_password_hash(user.password_hash, form.password.data):
             login_user(user)
             return redirect(url_for('home'))
-        flash("НЕверный email или пароль", 'danger')
-    return render_template('auth/login.html')
+        flash('НЕВЕРНО', 'danger')
+    return render_template('auth/login.html', form=form)
 
 # логаут
 @app.route('/logout')
@@ -105,18 +134,15 @@ def logout():
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
-    if request.method == 'POST':
-        hash_of_password = generate_password_hash(request.form['password'])
-        user = User(username=request.form['username'], email=request.form['email'],
-                    password_hash=hash_of_password)
-        try:
-            db.session.add(user)
-            db.session.commit()
-            flash('Регистрация выполнена', 'success')
-            return redirect(url_for('login'))
-        except:
-            flash('Регистрация не выполнена', 'danger')
-    return render_template('auth/register.html')
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        hashed_password = generate_password_hash(form.password.data)
+        user = User(username=form.username.data, email=form.email.data, password_hash=hashed_password)
+        db.session.add(user)
+        db.session.commit()
+        flash('ДОСТУП К СИСТЕМЕ ПОЛУЧЕН', 'success')
+        return redirect(url_for('login'))
+    return render_template('auth/register.html', form=form)
 #====#====#====#
 # БАЗОВЫЕ МАРШРУТЫ
 # основной маршрут
@@ -169,39 +195,60 @@ def follow(username):
 # Маршрут для редактирования профиля
 @app.route('/user/<username>/edit', methods=['GET', 'POST'])
 def user_edit(username):
+    print(f'!!!#@@##@$@#$@#$#@%$#@$@# {current_user.username}')
     if current_user.username != username:
         abort(403)
-    if request.method == 'POST':
-        current_user.biography = request.form['biography']
-        if 'avatar' in request.files:
-            file = request.files['avatar']
-            if file.filename:
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                current_user.avatar = filename
+    form = EditProfileForm(obj=current_user)
+    if form.validate_on_submit():
+        try:
+            current_user.username = form.username.data
+            current_user.biography = form.biography.data
+            if form.avatar.data:
+                filename = secure_filename(f'avatar_{current_user.id}.{form.avatar.data.filename.split('.')[-1]}')
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                form.avatar.data.save(filepath)
+                current_user.avatar=filename
+            if form.new_password.data:
+                if check_password_hash(current_user.password_hash, form.current_password.data):
+                    current_user.password_hash = generate_password_hash(form.new_password.data)
+                else:
+                    flash('НЕВЕРНЫЙ КОД ДОСТУПА', 'danger')
+                    return redirect(url_for('user_edit', username=username))
             db.session.commit()
-            flash('Профиль изменен успешно', 'success')
-        return redirect(url_for('show_user_profile', username=username))
-    return render_template('user/edit.html')
+            flash('ДАННЫЕ ИЗМЕНЕНЫ', 'success')
+            return redirect(url_for('show_user_profile', username=current_user.username))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'ОШИБКА ОБНОВЛЕНИЯ ДАННЫХ: {str(e)}', 'danger')
+    return render_template('user/edit.html', form=form)
 #====#====#====#
 # МАРШРУТЫ РАБОТЫ С ПОСТАМИ
 # маршрут создания поста
 @app.route('/post/create', methods=['GET', 'POST'])
 @login_required
 def create_post():
-    if request.method == 'POST':
-        post = Post(text=request.form['text'], user_id=current_user.id)
-        if 'image' in request.files:
-            file = request.files['image']
-            if file.filename:
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(app.cpnfig['UPLOAD_FOLDER'], filename))
-                post.image = filename
+    form = CreatePostForm()
+    if form.validate_on_submit():
+        post = Post(
+            text=form.text.data,
+            author=current_user
+        )
+        if form.image.data:
+            image = form.image.data
+            allowed_extensions = {'png', 'jpg', 'jpeg', 'gif'}
+            filename = secure_filename(image.filename)
+            if '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions:
+                unique_filename = f"{current_user.id}_{int(time.time())}.{filename.rsplit('.', 1)[1].lower()}"
+                upload_folder = current_app.config['UPLOAD_FOLDER']
+                os.makedirs(upload_folder, exist_ok=True)
+                image_path = os.path.join(upload_folder, unique_filename)
+                image.save(image_path)
+                post.image = unique_filename
         db.session.add(post)
         db.session.commit()
-        flash('Запощнено', 'success')
+        flash('СООБЩЕНИЕ ДОБАВЛЕНО В СИСТЕМУ', 'success')
         return redirect(url_for('home'))
-    return render_template('post/create.html')
+    return render_template('post/create.html', form=form)
 
 # маршрут детализации поста
 @app.route('/post/<int:post_id>')

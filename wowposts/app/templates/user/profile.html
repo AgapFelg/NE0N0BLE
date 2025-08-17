@@ -184,11 +184,11 @@
                         <div class="stat-label">СООБЩЕНИЙ</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-value">{{ user.followers.count() }}</div>
+                        <div class="stat-value">{{ user.followers|length }}</div>
                         <div class="stat-label">ПОДПИСЧИКОВ</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-value">{{ user.following.count() }}</div>
+                        <div class="stat-value">{{ user.following|length }}</div>
                         <div class="stat-label">ПОДПИСОК</div>
                     </div>
                 </div>

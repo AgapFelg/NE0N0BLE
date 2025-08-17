@@ -145,43 +145,42 @@
         </div>
 
         <form method="POST" action="{{ url_for('register') }}" class="register-form">
-            {{ form.hidden_tag() }}
+    {{ form.hidden_tag() }}
 
-            <div class="form-group">
-                <label for="username">▸ ИДЕНТИФИКАТОР ЛИЧНОСТИ</label>
-                <input type="text" id="username" name="username" required placeholder="agent_name">
-                <div class="requirements">Только латинские буквы, цифры и _</div>
-            </div>
+    <div class="form-group">
+        <label for="username">▸ ИМЯ ПОЛЬЗОВАТЕЛЯ:</label>
+        {{ form.username(class="form-control") }}
+        {% for error in form.username.errors %}
+            <span style="color: red;">{{ error }}</span>
+        {% endfor %}
+    </div>
 
-            <div class="form-group">
-                <label for="email">▸ КОДОВЫЙ АДРЕС</label>
-                <input type="email" id="email" name="email" required placeholder="user@neonoble.net">
-            </div>
+    <div class="form-group">
+        <label for="email">▸ EMAIL:</label>
+        {{ form.email(class="form-control") }}
+        {% for error in form.email.errors %}
+            <span style="color: red;">{{ error }}</span>
+        {% endfor %}
+    </div>
 
-            <div class="form-group">
-                <label for="password">▸ СЕКРЕТНЫЙ КОД</label>
-                <input type="password" id="password" name="password" required placeholder="••••••••">
-                <div class="password-strength"></div>
-                <div class="requirements">Минимум 8 символов</div>
-            </div>
+    <div class="form-group">
+        <label for="password">▸ СЕКРЕТНЫЙ КОД:</label>
+        {{ form.password(class="form-control") }}
+        {% for error in form.password.errors %}
+            <span style="color: red;">{{ error }}</span>
+        {% endfor %}
+    </div>
 
-            <div class="form-group">
-                <label for="confirm_password">▸ ПОДТВЕРЖДЕНИЕ КОДА</label>
-                <input type="password" id="confirm_password" name="confirm_password" required placeholder="••••••••">
-            </div>
+    <div class="form-group">
+        <label for="confirm_password">▸ ПОДТВЕРЖДЕНИЕ КОДА:</label>
+        {{ form.confirm_password(class="form-control") }}
+        {% for error in form.confirm_password.errors %}
+            <span style="color: red;">{{ error }}</span>
+        {% endfor %}
+    </div>
 
-            {% if error %}
-                <div class="access-denied" style="color: var(--danger); margin: 1rem 0; text-align: center;">
-                    ОШИБКА: {{ error }}
-                </div>
-            {% endif %}
-
-            <button type="submit" class="register-btn">ЗАРЕГИСТРИРОВАТЬСЯ</button>
-
-            <div class="security-level">
-                После регистрации потребуется подтверждение
-            </div>
-        </form>
+    {{ form.submit(class="register-btn") }}
+</form>
 
         <div class="register-footer">
             Уже есть доступ? <a href="{{ url_for('login') }}">Авторизоваться</a>

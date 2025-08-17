@@ -123,30 +123,38 @@
         </div>
 
         <form method="POST" action="{{ url_for('login') }}" class="login-form">
-            {{ form.hidden_tag() }}
+    {{ form.hidden_tag() }}
 
-            <div class="form-group">
-                <label for="email">▸ ИДЕНТИФИКАТОР</label>
-                <input type="email" id="email" name="email" required placeholder="user@neonoble.net">
+    <div class="form-group">
+        <label for="email">▸ ИДЕНТИФИКАТОР</label>
+        {{ form.email(class="form-control", placeholder="user@neonoble.net") }}
+        {% if form.email.errors %}
+            <div class="error-message" style="color: var(--danger); font-size: 0.8rem;">
+                {% for error in form.email.errors %}
+                    {{ error }}
+                {% endfor %}
             </div>
+        {% endif %}
+    </div>
 
-            <div class="form-group">
-                <label for="password">▸ КОД ДОСТУПА</label>
-                <input type="password" id="password" name="password" required placeholder="••••••••">
+    <div class="form-group">
+        <label for="password">▸ КОД ДОСТУПА</label>
+        {{ form.password(class="form-control", placeholder="••••••••") }}
+        {% if form.password.errors %}
+            <div class="error-message" style="color: var(--danger); font-size: 0.8rem;">
+                {% for error in form.password.errors %}
+                    {{ error }}
+                {% endfor %}
             </div>
+        {% endif %}
+    </div>
 
-            {% if error %}
-                <div class="access-denied">
-                    ОШИБКА: НЕВЕРНЫЕ УЧЕТНЫЕ ДАННЫЕ
-                </div>
-            {% endif %}
+    <button type="submit" class="login-btn">ПОДТВЕРДИТЬ</button>
 
-            <button type="submit" class="login-btn">ПОДТВЕРДИТЬ</button>
-
-            <div class="security-notice">
-                Все попытки входа регистрируются
-            </div>
-        </form>
+    <div class="security-notice">
+        Все попытки входа регистрируются
+    </div>
+</form>
 
         <div class="login-footer">
             Нет учетной записи? <a href="{{ url_for('register') }}">Запросить доступ</a>

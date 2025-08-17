@@ -204,7 +204,7 @@
                 <div class="avatar-controls">
                     <label class="avatar-upload-label">
                         <span class="avatar-upload-btn">ВЫБРАТЬ ФАЙЛ</span>
-                        <input type="file" id="avatar" name="avatar" class="avatar-upload-input" accept="image/*">
+                        {{ form.avatar(class="avatar-upload-input") }}
                     </label>
                     {% if current_user.avatar %}
                         <button type="button" class="avatar-remove-btn" onclick="document.getElementById('remove_avatar').value = '1'">
@@ -218,12 +218,15 @@
             <!-- Основная информация -->
             <div class="form-group">
                 <label for="username">▸ ИМЯ ПОЛЬЗОВАТЕЛЯ:</label>
-                <input type="text" id="username" name="username" value="{{ current_user.username }}" required>
+                {{ form.username(class="form-control") }}
+                {% for error in form.username.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                {% endfor %}
             </div>
 
             <div class="form-group">
                 <label for="biography">▸ БИОГРАФИЯ:</label>
-                <textarea id="biography" name="biography">{{ current_user.biography or '' }}</textarea>
+                {{ form.biography(class="form-control") }}
             </div>
 
             <!-- Смена пароля -->
@@ -231,15 +234,15 @@
                 <h3>▸ СМЕНА ПАРОЛЯ (ОПЦИОНАЛЬНО)</h3>
                 <div class="form-group">
                     <label for="current_password">▸ ТЕКУЩИЙ ПАРОЛЬ:</label>
-                    <input type="password" id="current_password" name="current_password">
+                    {{ form.current_password(class="form-control") }}
                 </div>
                 <div class="form-group">
                     <label for="new_password">▸ НОВЫЙ ПАРОЛЬ:</label>
-                    <input type="password" id="new_password" name="new_password">
+                    {{ form.new_password(class="form-control") }}
                 </div>
                 <div class="form-group">
                     <label for="confirm_password">▸ ПОДТВЕРЖДЕНИЕ:</label>
-                    <input type="password" id="confirm_password" name="confirm_password">
+                    {{ form.confirm_password(class="form-control") }}
                 </div>
             </div>
 
@@ -267,34 +270,6 @@
                 }
             };
             reader.readAsDataURL(e.target.files[0]);
-        }
-    });
-
-    // Подтверждение перед выходом
-    window.addEventListener('beforeunload', function(e) {
-        const form = document.querySelector('form');
-        const formData = new FormData(form);
-        let hasChanges = false;
-
-        // Проверяем изменения в основных полях
-        if (formData.get('username') !== '{{ current_user.username }}' ||
-            formData.get('biography') !== '{{ current_user.biography or '' }}') {
-            hasChanges = true;
-        }
-
-        // Проверяем загрузку нового аватара
-        if (document.getElementById('avatar').files.length > 0) {
-            hasChanges = true;
-        }
-
-        // Проверяем изменение пароля
-        if (formData.get('new_password') || formData.get('confirm_password')) {
-            hasChanges = true;
-        }
-
-        if (hasChanges) {
-            e.preventDefault();
-            e.returnValue = 'У вас есть несохранённые изменения. Вы уверены, что хотите уйти?';
         }
     });
 </script>
