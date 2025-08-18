@@ -19,6 +19,12 @@
         transition: all 0.3s;
     }
 
+    .post-text {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    }
+
     .post-card:hover {
         border-color: var(--primary);
         box-shadow: 0 0 15px rgba(0, 255, 136, 0.1);
@@ -48,8 +54,14 @@
     }
 
     .post-content {
-        margin: 1rem 0;
-        line-height: 1.6;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+    max-width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--steel);
+    background: rgba(10, 10, 10, 0.5);
+    margin: 0.5rem 0;
     }
 
     .post-image {
@@ -145,12 +157,12 @@
                     </div>
 
                     <div class="post-content">
-                        <p>{{ post.text }}</p>
-                        {% if post.image %}
-                            <img src="{{ url_for('static', filename='uploads/posts/' + post.image) }}"
-                                 class="post-image" alt="Изображение поста">
-                        {% endif %}
-                    </div>
+    <p class="post-text">{{ post.text }}</p>
+    {% if post.image %}
+    <img src="{{ url_for('static', filename='uploads/posts/' + post.image) }}"
+         class="post-image" alt="Изображение поста">
+    {% endif %}
+</div>
 
                     <div class="post-footer">
                         <span class="post-date">

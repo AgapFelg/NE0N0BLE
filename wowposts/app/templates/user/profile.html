@@ -14,6 +14,7 @@
 
     .profile-header {
         display: flex;
+        flex-direction: column;
         align-items: center;
         margin-bottom: 2rem;
         padding-bottom: 1rem;
@@ -21,16 +22,16 @@
     }
 
     .profile-avatar {
-        width: 100px;
-        height: 100px;
-        border: 2px solid var(--gold);
+        width: 120px;
+        height: 120px;
+        border: 3px solid var(--gold);
         border-radius: 2px;
-        margin-right: 2rem;
         object-fit: cover;
+        margin-bottom: 1rem;
     }
 
     .profile-info {
-        flex-grow: 1;
+        text-align: center;
     }
 
     .profile-username {
@@ -49,42 +50,49 @@
     .profile-bio {
         margin-top: 1rem;
         line-height: 1.6;
+        max-width: 600px;
+        word-wrap: break-word;
     }
 
     .profile-stats {
         display: flex;
-        gap: 2rem;
-        margin-top: 1rem;
+        justify-content: center;
+        gap: 3rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
     }
 
     .stat-item {
         text-align: center;
+        min-width: 100px;
     }
 
     .stat-value {
         font-family: 'Orbitron', sans-serif;
         color: var(--primary);
-        font-size: 1.2rem;
+        font-size: 1.5rem;
     }
 
     .stat-label {
         font-family: 'Courier New', monospace;
         color: var(--text-muted);
-        font-size: 0.8rem;
+        font-size: 0.9rem;
     }
 
     .profile-actions {
-        margin-top: 1rem;
         display: flex;
+        justify-content: center;
         gap: 1rem;
+        margin-top: 1.5rem;
     }
 
     .follow-btn, .edit-btn {
-        padding: 0.5rem 1.5rem;
+        padding: 0.7rem 1.5rem;
         font-family: 'Orbitron', sans-serif;
         letter-spacing: 1px;
         cursor: pointer;
         transition: all 0.3s;
+        border-radius: 2px;
     }
 
     .follow-btn {
@@ -98,7 +106,8 @@
     }
 
     .following {
-        background: linear-gradient(to right, var(--bg-dark), var(--steel)) !important;
+        background: var(--bg-dark) !important;
+        border: 1px solid var(--steel) !important;
         color: var(--text-muted) !important;
     }
 
@@ -115,12 +124,13 @@
 
     .profile-tabs {
         display: flex;
+        justify-content: center;
         border-bottom: 1px solid var(--border);
         margin-bottom: 2rem;
     }
 
     .profile-tab {
-        padding: 0.8rem 1.5rem;
+        padding: 1rem 2rem;
         cursor: pointer;
         border-bottom: 3px solid transparent;
         transition: all 0.3s;
@@ -142,13 +152,63 @@
         gap: 1.5rem;
     }
 
+    .post-card {
+        background: rgba(15, 15, 15, 0.7);
+        border: 1px solid var(--steel);
+        padding: 1rem;
+        transition: all 0.3s;
+    }
+
+    .post-card:hover {
+        border-color: var(--primary);
+        box-shadow: 0 0 15px rgba(0, 255, 136, 0.1);
+    }
+
+    .user-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .user-avatar {
+        width: 60px;
+        height: 60px;
+        border: 2px solid var(--gold);
+        border-radius: 2px;
+        object-fit: cover;
+        margin-bottom: 0.5rem;
+    }
+
+    .user-name {
+        font-family: 'Cinzel', serif;
+        color: var(--gold);
+        margin-bottom: 0.2rem;
+        text-align: center;
+    }
+
+    .post-content {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        white-space: pre-wrap;
+        padding: 0.5rem;
+        margin: 0.5rem 0;
+    }
+
+    .post-image {
+        max-width: 100%;
+        max-height: 300px;
+        object-fit: cover;
+        border: 1px solid var(--steel);
+        margin-top: 1rem;
+    }
+
     .empty-message {
         text-align: center;
         padding: 3rem;
         border: 1px dashed var(--border);
         margin-top: 2rem;
         font-family: 'Courier New', monospace;
-        color: var(--text-muted);
     }
 
     .empty-message h3 {
@@ -164,8 +224,7 @@
         <!-- Шапка профиля -->
         <div class="profile-header">
             <img src="{{ url_for('static', filename='uploads/avatars/' + user.avatar) if user.avatar else url_for('static', filename='images/default-avatar.png') }}"
-     class="avatar-class"
-     alt="{{ user.username }}">
+                 class="profile-avatar" alt="{{ user.username }}">
 
             <div class="profile-info">
                 <h1 class="profile-username">{{ user.username }}</h1>
@@ -197,9 +256,9 @@
                 <div class="profile-actions">
                     {% if current_user != user %}
                         <button class="follow-btn {% if current_user.is_following(user) %}following{% endif %}"
-        onclick="toggleFollow({{ user.id }})">
-    {% if current_user.is_following(user) %}ОТПИСАТЬСЯ{% else %}ПОДПИСАТЬСЯ{% endif %}
-</button>
+                                onclick="toggleFollow({{ user.id }})">
+                            {% if current_user.is_following(user) %}ОТПИСАТЬСЯ{% else %}ПОДПИСАТЬСЯ{% endif %}
+                        </button>
                     {% else %}
                         <a href="{{ url_for('user_edit', username=user.username) }}" class="edit-btn">
                             РЕДАКТИРОВАТЬ
@@ -225,13 +284,20 @@
                 <div class="posts-grid">
                     {% for post in user.posts %}
                         <div class="post-card">
+                            <div class="user-card">
+                                <img src="{{ url_for('static', filename='uploads/avatars/' + post.author.avatar) if post.author.avatar else url_for('static', filename='images/default-avatar.png') }}"
+                                     class="user-avatar" alt="{{ post.author.username }}">
+                                <div class="user-name">{{ post.author.username }}</div>
+                            </div>
+
                             <div class="post-content">
-                                <p>{{ post.text|truncate(100) }}</p>
+                                <p>{{ post.text }}</p>
                                 {% if post.image %}
                                     <img src="{{ url_for('static', filename='uploads/posts/' + post.image) }}"
                                          class="post-image" alt="Изображение поста">
                                 {% endif %}
                             </div>
+
                             <div class="post-footer">
                                 <span class="post-date">
                                     {{ post.created_at.strftime('%d.%m.%Y') }}
@@ -257,17 +323,16 @@
                     {% for like in user.likes %}
                         {% set post = like.post %}
                         <div class="post-card">
-                            <div class="post-header">
-                                <img src="{{ post.author.avatar or url_for('static', filename='images/default-avatar.png') }}"
-                                     class="post-avatar" alt="{{ post.author.username }}">
-                                <a href="{{ url_for('show_user_profile', username=post.author.username) }}"
-                                   class="post-author">
-                                    {{ post.author.username }}
-                                </a>
+                            <div class="user-card">
+                                <img src="{{ url_for('static', filename='uploads/avatars/' + post.author.avatar) if post.author.avatar else url_for('static', filename='images/default-avatar.png') }}"
+                                     class="user-avatar" alt="{{ post.author.username }}">
+                                <div class="user-name">{{ post.author.username }}</div>
                             </div>
+
                             <div class="post-content">
-                                <p>{{ post.text|truncate(100) }}</p>
+                                <p>{{ post.text }}</p>
                             </div>
+
                             <div class="post-footer">
                                 <span class="post-date">
                                     {{ post.created_at.strftime('%d.%m.%Y') }}
@@ -303,30 +368,30 @@
 
     // Подписка/отписка
     async function toggleFollow(userId) {
-    try {
-        const response = await fetch(`/user/${userId}/follow`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token() }}'
+        try {
+            const response = await fetch(`/user/${userId}/follow`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                const btn = document.querySelector('.follow-btn');
+                btn.classList.toggle('following');
+                btn.textContent = btn.classList.contains('following') ? 'ОТПИСАТЬСЯ' : 'ПОДПИСАТЬСЯ';
+
+                // Обновление счетчика подписчиков
+                const followersCount = document.querySelectorAll('.stat-value')[1];
+                if (followersCount) {
+                    followersCount.textContent = data.followers_count;
+                }
             }
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            const btn = document.querySelector('.follow-btn');
-            btn.classList.toggle('following');
-            btn.textContent = btn.classList.contains('following') ? 'ОТПИСАТЬСЯ' : 'ПОДПИСАТЬСЯ';
-
-            // Обновление счетчика подписчиков
-            const followersCount = document.querySelectorAll('.stat-value')[1];
-            if (followersCount) {
-                followersCount.textContent = data.followers_count;
-            }
+        } catch (error) {
+            console.error('Error:', error);
         }
-    } catch (error) {
-        console.error('Error:', error);
     }
-}
 </script>
 {% endblock %}

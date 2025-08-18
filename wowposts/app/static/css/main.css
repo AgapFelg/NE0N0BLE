@@ -139,6 +139,56 @@ button:hover {
     animation: neon-pulse 3s infinite;
 }
 
+.user-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.user-avatar {
+    width: 800px;
+    height: 800px;
+    border: 2px solid var(--gold);
+    border-radius: 2px;
+    object-fit: cover;
+    margin-bottom: 0.5rem;
+}
+
+.user-info {
+    text-align: center;
+    font-family: 'Courier New', monospace;
+}
+
+.user-name {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    margin-bottom: 0.2rem;
+}
+
+.user-meta {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.post-card {
+    background: rgba(15, 15, 15, 0.7);
+    border: 1px solid var(--steel);
+    padding: 1rem;
+    transition: all 0.3s;
+}
+
+.post-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.1);
+}
 
 
 
