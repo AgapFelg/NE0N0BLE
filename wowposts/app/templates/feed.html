@@ -97,7 +97,7 @@
         </div>
     {% else %}
         <div class="feed-container">
-            {% if current_user.following.count() == 0 %}
+            {% if current_user.following|length == 0 %}
                 <div class="follow-promo">
                     <h3 class="aristocrat">ВНИМАНИЕ: НЕТ АКТИВНЫХ КАНАЛОВ</h3>
                     <p>Вы не подписаны ни на одного пользователя. Найдите союзников в <a href="{{ url_for('home') }}">главном терминале</a>.</p>
@@ -112,8 +112,9 @@
                 {% for post in posts %}
                     <div class="post-card">
                         <div class="post-header">
-                            <img src="{{ post.author.avatar or url_for('static', filename='images/default-avatar.png') }}"
-                                 class="post-avatar" alt="{{ post.author.username }}">
+                            <img src="{{ url_for('static', filename='uploads/avatars/' + post.author.avatar) if post.author.avatar else url_for('static', filename='images/default-avatar.png') }}"
+     class="avatar-class"
+     alt="{{ post.author.username }}">
                             <a href="{{ url_for('show_user_profile', username=post.author.username) }}"
                                class="post-author">
                                 {{ post.author.username }}

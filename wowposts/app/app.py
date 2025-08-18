@@ -64,6 +64,12 @@ class CreatePostForm(FlaskForm):
     image = FileField('ИЗОБРАЖЕНИЕ')
     submit = SubmitField('ОПУБЛИКОВАТЬ СООБЩЕНИЕ')
 
+# форма для редактирования поста
+class EditPostForm(FlaskForm):
+    text = TextAreaField('ТЕКСТ СООБЩЕНИЯ', validators=[DataRequired()])
+    image = FileField('ИЗОБРАЖЕНИЕ | ОПЦИОНАЛЬНО')
+    submit = SubmitField('ИЗМЕНИТЬ СООБЩЕНИЕ')
+
 # форма редоактирования профиля
 class EditProfileForm(FlaskForm):
     username = StringField('Имя пользователя', validators=[
@@ -75,6 +81,16 @@ class EditProfileForm(FlaskForm):
     current_password = PasswordField('Текущий пароль', validators=[Optional()])
     new_password = PasswordField('Новый пароль', validators=[Optional()])
     confirm_password = PasswordField('Подтверждение пароля', validators=[Optional()])
+
+# формя для комментария
+class CommentForm(FlaskForm):
+    text = TextAreaField('КОММЕНТАРИЙ', validators=[DataRequired()])
+    submit = SubmitField('ОТПРАВИТЬ КОММЕНТАРИЙ')
+
+# форма для редактирования комментарий
+class EditCommentForm(FlaskForm):
+    text = TextAreaField('ИЗМЕНЕННЫЙ КОММЕНТАРИЙ', validators=[DataRequired()])
+    submit = SubmitField('ОБНОВИТЬ')
 
 # Создаем приложение
 app = create_app()
@@ -174,23 +190,22 @@ def show_user_profile(username):
     return render_template('user/profile.html', user=user, posts=posts)
 
 # Маршрут для подписки на пользователя
-@app.route('/user/<username>/follow', methods=['POST'])
-def follow(username):
-    user = User.query.filter_by(username=username).first_or_404()
+@app.route('/user/<int:user_id>/follow', methods=['POST'])
+@login_required
+def follow(user_id):
+    user = User.query.get_or_404(user_id)
     if user == current_user:
-        flash('Нельзя подписаться на самого себя', 'warning')
-        return redirect(url_for('show_user_profile', username=username))
+        return jsonify({'success': False, 'message': 'НЕЛЬЗЯ ПОДПИСАТЬСЯ НА СЕБЯ'}), 400
     existing_follow = Follow.query.filter_by(follower_id=current_user.id, followed_id=user.id).first()
     if existing_follow:
         db.session.delete(existing_follow)
-        db.session.commit()
-        flash(f'Отписка от {username}', 'info')
+        action = 'unfollow'
     else:
         new_follow = Follow(follower_id=current_user.id, followed_id=user.id)
         db.session.add(new_follow)
-        db.session.commit()
-        flash(f'Подписка на {username}', 'success')
-    return redirect(url_for('show_user_profile', username=username))
+        action='follow'
+    db.session.commit()
+    return jsonify({'success': True, 'action': action, 'followers_count': len(user.followers)})
 
 # Маршрут для редактирования профиля
 @app.route('/user/<username>/edit', methods=['GET', 'POST'])
@@ -205,7 +220,7 @@ def user_edit(username):
             current_user.biography = form.biography.data
             if form.avatar.data:
                 filename = secure_filename(f'avatar_{current_user.id}.{form.avatar.data.filename.split('.')[-1]}')
-                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], 'avatars', filename)
                 form.avatar.data.save(filepath)
                 current_user.avatar=filename
             if form.new_password.data:
@@ -241,7 +256,7 @@ def create_post():
                 unique_filename = f"{current_user.id}_{int(time.time())}.{filename.rsplit('.', 1)[1].lower()}"
                 upload_folder = current_app.config['UPLOAD_FOLDER']
                 os.makedirs(upload_folder, exist_ok=True)
-                image_path = os.path.join(upload_folder, unique_filename)
+                image_path = os.path.join(upload_folder, 'posts', unique_filename)
                 image.save(image_path)
                 post.image = unique_filename
         db.session.add(post)
@@ -251,10 +266,23 @@ def create_post():
     return render_template('post/create.html', form=form)
 
 # маршрут детализации поста
-@app.route('/post/<int:post_id>')
+@app.route('/post/<int:post_id>', methods=['GET', 'POST'])
 def detail_post(post_id):
     post = Post.query.get_or_404(post_id)
-    return render_template('post/detail.html', post=post)
+    form = CommentForm()
+
+    if form.validate_on_submit():
+        comment = Comment(
+            text=form.text.data,
+            user_id=current_user.id,
+            post_id=post.id
+        )
+        db.session.add(comment)
+        db.session.commit()
+        flash('Комментарий добавлен', 'success')
+        return redirect(url_for('detail_post', post_id=post.id))
+
+    return render_template('post/detail.html', post=post, form=form)
 
 # маршрут редактирования поста
 @app.route('/post/<int:post_id>/edit', methods=['GET', 'POST'])
@@ -263,21 +291,35 @@ def edit_post(post_id):
     post = Post.query.get_or_404(post_id)
     if post.author != current_user:
         abort(403)
-    if request.method == 'POST':
-        post.text = request.form['text']
-        if 'image' in request.files:
-            file = request.files['image']
-            if file.filename:
-                # делитинг старого изображения
-                if post.image:
+    form = EditPostForm(obj=post)
+    if form.validate_on_submit():
+        post.text = form.text.data
+        # Обработка изображения
+        if form.image.data:
+            # Удаляем старое изображение, если оно есть
+            if post.image:
+                try:
                     os.remove(os.path.join(app.config['UPLOAD_FOLDER'], post.image))
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                post.image = filename
+                except OSError:
+                    pass
+            # Сохраняем новое изображение
+            filename = secure_filename(form.image.data.filename)
+            unique_filename = f"{post.id}_{int(time.time())}_{filename}"
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+            form.image.data.save(filepath)
+            post.image = unique_filename
+        # Обработка удаления изображения
+        if 'remove_image' in request.form and request.form['remove_image'] == '1':
+            if post.image:
+                try:
+                    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], post.image))
+                except OSError:
+                    pass
+            post.image = None
         db.session.commit()
-        flash('Пост изменен успешно', 'success')
+        flash('Пост успешно обновлен', 'success')
         return redirect(url_for('detail_post', post_id=post.id))
-    return render_template('post/edit.html', post=post)
+    return render_template('post/edit.html', post=post, form=form)
 
 # маршрут удаления поста
 @app.route('/post/<int:post_id>/delete', methods=['POST'])
@@ -296,12 +338,19 @@ def delete_post(post_id):
 # МАРШРУТЫ РАБОТЫ С КОММЕНТАРИЯМИ
 # маршрут добавления комментария
 @app.route('/post/<int:post_id>/comment', methods=['POST'])
+@login_required
 def add_comment(post_id):
     post = Post.query.get_or_404(post_id)
-    comment = Comment(text=request.form['text'], user_id=current_user.id, post_id=post_id)
-    db.session.add(comment)
-    db.session.commit()
-    flash('Комментарий добавлен', 'success')
+    text = request.form.get('text')
+    if text:
+        comment = Comment(
+            text=text,
+            user_id=current_user.id,
+            post_id=post.id
+        )
+        db.session.add(comment)
+        db.session.commit()
+        flash('Комментарий добавлен', 'success')
     return redirect(url_for('detail_post', post_id=post.id))
 
 # маршрут редактирования комментария
@@ -311,15 +360,19 @@ def edit_comment(comment_id):
     comment = Comment.query.get_or_404(comment_id)
     if comment.author != current_user:
         abort(403)
-    if request.method == 'POST':
-        comment.text = request.form['text']
+
+    form = EditCommentForm(obj=comment)
+
+    if form.validate_on_submit():
+        form.populate_obj(comment)
         db.session.commit()
         flash('Комментарий изменен', 'success')
         return redirect(url_for('detail_post', post_id=comment.post_id))
-    return render_template('comment/edit.html', post_id=comment.post_id)
+
+    return render_template('comment/edit.html', comment=comment, form=form)
 
 # маршрут удаления комментария
-@app.route('/comment/<int:comment_id>/delete', methods=['POST'])
+@app.route('/comment/<int:comment_id>/delete', methods=['GET', 'POST'])
 @login_required
 def delete_comment(comment_id):
     comment = Comment.query.get_or_404(comment_id)

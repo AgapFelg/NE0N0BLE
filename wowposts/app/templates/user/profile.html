@@ -163,8 +163,9 @@
     <div class="profile-container">
         <!-- Шапка профиля -->
         <div class="profile-header">
-            <img src="{{ user.avatar or url_for('static', filename='images/default-avatar.png') }}"
-                 class="profile-avatar" alt="{{ user.username }}">
+            <img src="{{ url_for('static', filename='uploads/avatars/' + user.avatar) if user.avatar else url_for('static', filename='images/default-avatar.png') }}"
+     class="avatar-class"
+     alt="{{ user.username }}">
 
             <div class="profile-info">
                 <h1 class="profile-username">{{ user.username }}</h1>
@@ -196,13 +197,9 @@
                 <div class="profile-actions">
                     {% if current_user != user %}
                         <button class="follow-btn {% if current_user.is_following(user) %}following{% endif %}"
-                                onclick="toggleFollow({{ user.id }})">
-                            {% if current_user.is_following(user) %}
-                                ОТПИСАТЬСЯ
-                            {% else %}
-                                ПОДПИСАТЬСЯ
-                            {% endif %}
-                        </button>
+        onclick="toggleFollow({{ user.id }})">
+    {% if current_user.is_following(user) %}ОТПИСАТЬСЯ{% else %}ПОДПИСАТЬСЯ{% endif %}
+</button>
                     {% else %}
                         <a href="{{ url_for('user_edit', username=user.username) }}" class="edit-btn">
                             РЕДАКТИРОВАТЬ
@@ -306,39 +303,30 @@
 
     // Подписка/отписка
     async function toggleFollow(userId) {
-        if (!{{ 'true' if current_user.is_authenticated else 'false' }}) {
-            window.location.href = "{{ url_for('login') }}";
-            return;
-        }
-
-        const btn = document.querySelector('.follow-btn');
-        const isFollowing = btn.classList.contains('following');
-
-        try {
-            const response = await fetch(`/user/${userId}/follow`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    action: isFollowing ? 'unfollow' : 'follow'
-                })
-            });
-
-            if (response.ok) {
-                btn.classList.toggle('following');
-                btn.textContent = isFollowing ? 'ПОДПИСАТЬСЯ' : 'ОТПИСАТЬСЯ';
-
-                // Обновляем счетчики
-                const followersCount = document.querySelectorAll('.stat-value')[1];
-                followersCount.textContent = isFollowing ?
-                    parseInt(followersCount.textContent) - 1 :
-                    parseInt(followersCount.textContent) + 1;
+    try {
+        const response = await fetch(`/user/${userId}/follow`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token() }}'
             }
-        } catch (error) {
-            console.error('Ошибка:', error);
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            const btn = document.querySelector('.follow-btn');
+            btn.classList.toggle('following');
+            btn.textContent = btn.classList.contains('following') ? 'ОТПИСАТЬСЯ' : 'ПОДПИСАТЬСЯ';
+
+            // Обновление счетчика подписчиков
+            const followersCount = document.querySelectorAll('.stat-value')[1];
+            if (followersCount) {
+                followersCount.textContent = data.followers_count;
+            }
         }
+    } catch (error) {
+        console.error('Error:', error);
     }
+}
 </script>
 {% endblock %}

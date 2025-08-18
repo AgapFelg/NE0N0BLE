@@ -25,6 +25,24 @@ class User(db.Model, UserMixin):
     followers = db.relationship('Follow', foreign_keys='Follow.followed_id', backref='followed', lazy=True)
     following = db.relationship('Follow', foreign_keys='Follow.follower_id', backref='follower', lazy=True)
 
+    def is_following(self, user):
+        return Follow.query.filter_by(follower_id=self.id, followed_id=user.id).first() is not None
+
+    def is_followed_by(self, user):
+        return Follow.query.filter_by(follower_id=self.id, followed_id=self.id).first() is not None
+
+    def follow(self, user):
+        if not self.is_following(user):
+            follow = Follow(follower_id=self.id, followed_id=user.id)
+            db.session.add(follow)
+            db.session.commit()
+
+    def unfollow(self, user):
+        follow = Follow.query.filter_by(follower_id=self.id, followed_id=user.id).first()
+        if follow:
+            db.session.delete(follow)
+            db.session.commit()
+
 # модель постов
 class Post(db.Model):
     __tablename__ = 'posts'

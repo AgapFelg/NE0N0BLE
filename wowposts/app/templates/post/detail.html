@@ -221,8 +221,9 @@
     <div class="post-detail-container">
         <!-- Заголовок поста -->
         <div class="post-header">
-            <img src="{{ post.author.avatar or url_for('static', filename='images/default-avatar.png') }}"
-                 class="post-avatar" alt="{{ post.author.username }}">
+            <img src="{{ url_for('static', filename='uploads/avatars/' + post.author.avatar) if post.author.avatar else url_for('static', filename='images/default-avatar.png') }}"
+     class="avatar-class"
+     alt="{{ post.author.username }}">
             <a href="{{ url_for('show_user_profile', username=post.author.username) }}" class="post-author">
                 {{ post.author.username }}
             </a>
@@ -254,6 +255,7 @@
                         РЕДАКТИРОВАТЬ
                     </a>
                     <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST" style="display: inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="delete-btn"
                                 onclick="return confirm('УДАЛИТЬ СООБЩЕНИЕ НАВСЕГДА?')">
                             УДАЛИТЬ

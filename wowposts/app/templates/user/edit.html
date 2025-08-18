@@ -198,9 +198,7 @@
 
             <!-- Секция аватара -->
             <div class="avatar-section">
-                <img src="{{ current_user.avatar or url_for('static', filename='images/default-avatar.png') }}"
-                     class="current-avatar" id="avatar-preview">
-
+                <img src="{{ url_for('static', filename='uploads/avatars/' + current_user.avatar) if current_user.avatar else url_for('static', filename='images/default-avatar.png') }}"
                 <div class="avatar-controls">
                     <label class="avatar-upload-label">
                         <span class="avatar-upload-btn">ВЫБРАТЬ ФАЙЛ</span>
