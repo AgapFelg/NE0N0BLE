@@ -329,7 +329,7 @@ def delete_post(post_id):
     if post.author != current_user and not current_user.is_admin:
         abort(403)
     if post.image:
-        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], post.imae))
+        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], 'posts', post.image))
     db.session.delete(post)
     db.session.commit()
     flash('Пост делитнут', 'info')
@@ -400,7 +400,10 @@ def search(query):
 @login_required
 def like(post_id):
     post = Post.query.get_or_404(post_id)
-    existing_like = Like.query.filter_by(user_id=current_user.id, post_id=post.id).first()
+    existing_like = Like.query.filter_by(
+        user_id=current_user.id,
+        post_id=post.id
+    ).first()
     if existing_like:
         db.session.delete(existing_like)
         liked = False
@@ -409,7 +412,12 @@ def like(post_id):
         db.session.add(new_like)
         liked = True
     db.session.commit()
-    return jsonify({'liked':liked,'likes_count':len(post.likes)})
+    updated_post = Post.query.get(post_id)
+    return jsonify({
+        'success': True,
+        'liked': liked,
+        'likes_count': len(updated_post.likes)
+    })
 
 #====#====#====#
 # хендлеры-обработчики ошибок

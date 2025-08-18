@@ -157,9 +157,9 @@
                             {{ post.created_at.strftime('%d.%m.%Y %H:%M') }}
                         </span>
                         <button class="like-btn {% if current_user.is_authenticated and post in current_user.likes %}liked{% endif %}"
-                                data-post-id="{{ post.id }}">
-                            ♠ {{ post.likes|length }}
-                        </button>
+        data-post-id="{{ post.id }}">
+    ♠ <span class="like-count">{{ post.likes|length }}</span>
+</button>
                     </div>
                 </div>
             {% endfor %}
@@ -191,27 +191,48 @@
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.like-btn').forEach(btn => {
-            btn.addEventListener('click', async function() {
-                const postId = this.dataset.postId;
-                const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.like-btn').forEach(btn => {
+        btn.addEventListener('click', async function(e) {
+            e.preventDefault();
 
-                try {
-                    const response = await fetch(`/like/${postId}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': csrfToken
-                        }
-                    });
+            const postId = this.dataset.postId;
+            const likeBtn = this;
+            const likeCountEl = this.querySelector('.like-count');
 
-                    // Обработка ответа...
-                } catch (error) {
-                    console.error('Ошибка:', error);
+            try {
+                const response = await fetch(`/like/${postId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
-            });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    likeBtn.classList.toggle('liked');
+                    likeCountEl.textContent = data.likes_count;
+                } else {
+                    console.error('Error:', data);
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                // Если ошибка авторизации, перенаправляем на страницу входа
+                if (error.message.includes('401')) {
+                    window.location.href = "{{ url_for('login') }}";
+                }
+            }
         });
     });
+});
 </script>
 {% endblock %}

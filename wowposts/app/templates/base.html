@@ -7,7 +7,69 @@
     <title>{% block title %}NE0N0BLE{% endblock %}</title>
     <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
     {% block extra_css %}{% endblock %}
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Orbitron:wght@400;700&family=Courier+New&display=swap" rel="stylesheet">
 </head>
+
+<style>
+:root {
+    --bg-dark: #0a0a0a;
+    --bg-darker: #050505;
+    --text-main: #e0e0e0;
+    --text-muted: #888;
+    --primary: #00ff88;
+    --secondary: #6a00f4;
+    --danger: #ff3860;
+    --gold: #d4af37;
+    --steel: #3a4e5f;
+    --border: #1a1a1a;
+}
+
+body {
+    background: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Courier New', monospace;
+    line-height: 1.6;
+}
+
+.terminal {
+    background: linear-gradient(135deg, var(--bg-darker), var(--bg-dark));
+    border: 1px solid var(--steel);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    padding: 2rem;
+    margin: 1rem auto;
+    max-width: 1200px;
+}
+
+/* Стили для изображений */
+.post-image, .avatar-class {
+    max-width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    border: 1px solid var(--gold);
+    margin: 1rem 0;
+}
+
+/* Киберпанк элементы */
+.cyber-border {
+    border: 1px solid var(--primary);
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+.military-badge {
+    background: var(--bg-dark);
+    border: 1px solid var(--gold);
+    padding: 0.3rem 0.8rem;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+.aristocrat-accent {
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    letter-spacing: 1px;
+}
+</style>
+
 <body class="cyber-military">
     <!-- shapka -->
     <header class="site-header">
