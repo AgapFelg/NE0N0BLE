@@ -14,14 +14,14 @@
 :root {
     --bg-dark: #0a0a0a;
     --bg-darker: #050505;
-    --text-main: #e0e0e0;
-    --text-muted: #888;
-    --primary: #00ff88;
-    --secondary: #6a00f4;
-    --danger: #ff3860;
-    --gold: #d4af37;
-    --steel: #3a4e5f;
-    --border: #1a1a1a;
+    --text-main: #8ffe95;
+    --text-muted: #8ffe95;
+    --primary: #8ffe95;
+    --secondary: #8ffe95;
+    --danger: #8ffe95;
+    --gold: #8ffe95;
+    --steel: #8ffe95;
+    --border: #8ffe95;
 }
 
 body {
@@ -32,6 +32,7 @@ body {
     margin: 0;
     overflow-x: hidden;
     position: relative;
+    min-height: 100vh;
 }
 
 /* Контейнер для матричного фона */
@@ -45,12 +46,83 @@ body {
     opacity: 0.7;
 }
 
+/* Стили для шапки */
+.site-header {
+    background-color: #000;
+    position: relative;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--primary);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+    overflow: hidden;
+}
+
+.header-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.main-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.nav-logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-decoration: none;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.7);
+    letter-spacing: 2px;
+    position: relative;
+    z-index: 10;
+    padding: 0.5rem 1rem;
+    background-color: rgba(0, 0, 0, 0.8);
+    border: 1px solid var(--primary);
+}
+
+.nav-links {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-decoration: none;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.7);
+    letter-spacing: 2px;
+    position: relative;
+    z-index: 10;
+    padding: 0.5rem 1rem;
+    background-color: rgba(0, 0, 0, 0.8);
+    border: 1px solid var(--primary);
+}
+
+.nav-link {
+    color: var(--text-main);
+    text-decoration: none;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0.5rem 0.8rem;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    box-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+}
+
 .terminal {
     background: linear-gradient(135deg, var(--bg-darker), var(--bg-dark));
     border: 1px solid var(--steel);
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     padding: 2rem;
-    margin: 1rem auto;
+    margin: 2rem auto;
     max-width: 1200px;
     position: relative;
 }
@@ -85,11 +157,91 @@ body {
     letter-spacing: 1px;
 }
 
-/* Адаптивность для мобильных устройств */
+/* Футер */
+.crypto-footer {
+    text-align: center;
+    padding: 2rem;
+    margin-top: 2rem;
+    border-top: 1px solid var(--steel);
+}
+
+.footer-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.crypto-signal {
+    font-family: 'Courier New', monospace;
+    color: var(--primary);
+}
+
+.gold-divider {
+    color: var(--gold);
+}
+
+.copyright {
+    color: var(--text-muted);
+}
+
+/* Анимация вытекания кода из заголовка */
+#header-matrix {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 70%;
+    pointer-events: none;
+}
+
+/* Адаптивность */
 @media (max-width: 768px) {
-    #matrix-bg {
-        opacity: 0.4; /* Уменьшаем непрозрачность на мобильных */
+    .main-nav {
+        flex-direction: column;
+        gap: 1rem;
     }
+
+    .nav-links {
+        justify-content: center;
+    }
+
+    #matrix-bg {
+        opacity: 0.4;
+    }
+}
+
+/* Стили для flash-сообщений */
+.flash-messages {
+    margin-bottom: 1.5rem;
+}
+
+.flash-success {
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    font-family: 'Courier New', monospace;
+}
+
+.flash-error {
+    background: rgba(255, 56, 96, 0.1);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    font-family: 'Courier New', monospace;
+}
+
+.flash-warning {
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    font-family: 'Courier New', monospace;
 }
 </style>
 
@@ -97,8 +249,9 @@ body {
     <!-- Матричный фон -->
     <canvas id="matrix-bg"></canvas>
 
-    <!-- shapka -->
+    <!-- Шапка с эффектом вытекания кода -->
     <header class="site-header">
+        <canvas id="header-matrix"></canvas>
         <div class="header-grid">
             <nav class="main-nav">
                 <a href="{{ url_for('home') }}" class="nav-logo">/NE0N0BLE/</a>
@@ -116,7 +269,7 @@ body {
         </div>
     </header>
 
-    <!-- типо терминал -->
+    <!-- Основной контент -->
     <main class="terminal">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -130,6 +283,7 @@ body {
 
         {% block content %}{% endblock %}
     </main>
+
     <footer class="crypto-footer">
         <div class="footer-content">
             <span class="crypto-signal">[ TRANSMISSION_END ]</span>
@@ -139,7 +293,7 @@ body {
     </footer>
 
     <script>
-        // Скрипт для создания матричного эффекта
+        // Скрипт для создания матричного фона
         document.addEventListener('DOMContentLoaded', function() {
             const canvas = document.getElementById('matrix-bg');
             const ctx = canvas.getContext('2d');
@@ -197,6 +351,77 @@ body {
                 }
                 drops.length = newColumns;
             });
+
+            // Скрипт для эффекта вытекания кода из заголовка
+            const headerCanvas = document.getElementById('header-matrix');
+            const headerCtx = headerCanvas.getContext('2d');
+
+            // Установка размера canvas заголовка
+            function setHeaderCanvasSize() {
+                headerCanvas.width = headerCanvas.offsetWidth;
+                headerCanvas.height = headerCanvas.offsetHeight;
+            }
+
+            setHeaderCanvasSize();
+
+            // Настройки для эффекта вытекания
+            const headerFontSize = 12;
+            const headerColumns = headerCanvas.width / headerFontSize;
+            const headerDrops = [];
+
+            // Инициализация капель для заголовка
+            for (let i = 0; i < headerColumns; i++) {
+                headerDrops[i] = {
+                    y: Math.random() * -100, // Начинаем выше видимой области
+                    speed: 2 + Math.random() * 5, // Случайная скорость
+                    length: Math.floor(5 + Math.random() * 20) // Случайная длина цепочки
+                };
+            }
+
+            // Функция отрисовки эффекта вытекания
+            function drawHeaderMatrix() {
+                headerCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                headerCtx.fillRect(0, 0, headerCanvas.width, headerCanvas.height);
+
+                headerCtx.fillStyle = '#00ff88';
+                headerCtx.font = headerFontSize + 'px monospace';
+
+                for (let i = 0; i < headerColumns; i++) {
+                    const x = i * headerFontSize;
+                    const drop = headerDrops[i];
+
+                    // Рисуем цепочку символов
+                    for (let j = 0; j < drop.length; j++) {
+                        const yPos = drop.y - (j * headerFontSize);
+                        if (yPos > 0) {
+                            const charIndex = Math.floor(Math.random() * matrixChars.length);
+                            const text = matrixChars.charAt(charIndex);
+
+                            // Делаем символы бледнее по мере удаления от головного
+                            const opacity = 1 - (j / drop.length);
+                            headerCtx.fillStyle = `rgba(0, 255, 136, ${opacity})`;
+
+                            headerCtx.fillText(text, x, yPos);
+                        }
+                    }
+
+                    // Перемещаем каплю вниз
+                    drop.y += drop.speed;
+
+                    // Если капля ушла за пределы,重置 ее
+                    if (drop.y > headerCanvas.height + drop.length * headerFontSize) {
+                        drop.y = Math.random() * -100;
+                        drop.speed = 2 + Math.random() * 5;
+                        drop.length = Math.floor(5 + Math.random() * 20);
+                    }
+                }
+            }
+
+            // Запуск анимации для заголовка
+            setInterval(drawHeaderMatrix, 50);
+
+            // Обновление размера canvas заголовка при изменении размера окна
+            window.addEventListener('resize', setHeaderCanvasSize);
         });
     </script>
 

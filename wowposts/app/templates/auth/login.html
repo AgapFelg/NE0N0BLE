@@ -111,54 +111,58 @@
         color: var(--text-muted);
         text-align: center;
     }
+
+    .error-message {
+        color: var(--danger);
+        font-size: 0.8rem;
+        margin-top: 0.3rem;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="terminal">
-    <div class="login-container">
-        <div class="login-header">
-            <h2>АУТЕНТИФИКАЦИЯ</h2>
-            <p>Требуется авторизация уровня <span class="aristocrat">SILVER CLEARANCE</span></p>
+<div class="login-container">
+    <div class="login-header">
+        <h2>АУТЕНТИФИКАЦИЯ</h2>
+        <p>Требуется авторизация уровня <span class="aristocrat">SILVER CLEARANCE</span></p>
+    </div>
+
+    <form method="POST" action="{{ url_for('login') }}" class="login-form">
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+            <label for="email">▸ ИДЕНТИФИКАТОР</label>
+            {{ form.email(class="form-control", placeholder="user@neonoble.net") }}
+            {% if form.email.errors %}
+                <div class="error-message">
+                    {% for error in form.email.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
 
-        <form method="POST" action="{{ url_for('login') }}" class="login-form">
-    {{ form.hidden_tag() }}
-
-    <div class="form-group">
-        <label for="email">▸ ИДЕНТИФИКАТОР</label>
-        {{ form.email(class="form-control", placeholder="user@neonoble.net") }}
-        {% if form.email.errors %}
-            <div class="error-message" style="color: var(--danger); font-size: 0.8rem;">
-                {% for error in form.email.errors %}
-                    {{ error }}
-                {% endfor %}
-            </div>
-        {% endif %}
-    </div>
-
-    <div class="form-group">
-        <label for="password">▸ КОД ДОСТУПА</label>
-        {{ form.password(class="form-control", placeholder="••••••••") }}
-        {% if form.password.errors %}
-            <div class="error-message" style="color: var(--danger); font-size: 0.8rem;">
-                {% for error in form.password.errors %}
-                    {{ error }}
-                {% endfor %}
-            </div>
-        {% endif %}
-    </div>
-
-    <button type="submit" class="login-btn">ПОДТВЕРДИТЬ</button>
-
-    <div class="security-notice">
-        Все попытки входа регистрируются
-    </div>
-</form>
-
-        <div class="login-footer">
-            Нет учетной записи? <a href="{{ url_for('register') }}">Запросить доступ</a>
+        <div class="form-group">
+            <label for="password">▸ КОД ДОСТУПА</label>
+            {{ form.password(class="form-control", placeholder="••••••••") }}
+            {% if form.password.errors %}
+                <div class="error-message">
+                    {% for error in form.password.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
+
+        <button type="submit" class="login-btn">ПОДТВЕРДИТЬ</button>
+
+        <div class="security-notice">
+            Все попытки входа регистрируются
+        </div>
+    </form>
+
+    <div class="login-footer">
+        Нет учетной записи? <a href="{{ url_for('register') }}">Запросить доступ</a>
     </div>
 </div>
 {% endblock %}
