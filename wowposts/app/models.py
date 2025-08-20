@@ -43,6 +43,10 @@ class User(db.Model, UserMixin):
             db.session.delete(follow)
             db.session.commit()
 
+    @property
+    def User(self, post_id):
+        return any(like.post_id == post_id for file in self.likes)
+
 # модель постов
 class Post(db.Model):
     __tablename__ = 'posts'

@@ -166,7 +166,10 @@ def register():
 def home():
     page = request.args.get('page', 1, type=int)
     posts = Post.query.order_by(Post.created_at.desc()).paginate(page=page, per_page=5)
-    return render_template('index.html', posts=posts)
+    liked_post_ids = []
+    if current_user.is_authenticated:
+        liked_post_ids = [like.post_id for like in current_user.likes]
+    return render_template('index.html', posts=posts, liked_post_ids=liked_post_ids)
 
 # маршрут в котором будут показываться посты только пользователей, на которых оформлена подписка
 @app.route('/feed')
@@ -174,7 +177,8 @@ def home():
 def feed():
     followed_ids = [f.followed_id for f in current_user.following]
     posts = Post.query.filter(Post.user_id.in_(followed_ids)).order_by(Post.created_at.desc()).all()
-    return render_template('feed.html', posts=posts)
+    liked_post_ids = [like.post_id for like in current_user.likes]
+    return render_template('feed.html', posts=posts, liked_post_ids=liked_post_ids)
 
 # маршрут "о нас"
 @app.route('/about')
@@ -203,9 +207,14 @@ def follow(user_id):
     else:
         new_follow = Follow(follower_id=current_user.id, followed_id=user.id)
         db.session.add(new_follow)
-        action='follow'
+        action = 'follow'
     db.session.commit()
-    return jsonify({'success': True, 'action': action, 'followers_count': len(user.followers)})
+    return jsonify({
+        'success': True,
+        'action': action,
+        'followers_count': len(user.followers),
+        'user_id': user.id  # Добавляем ID пользователя для обновления всех кнопок
+    })
 
 # Маршрут для редактирования профиля
 @app.route('/user/<username>/edit', methods=['GET', 'POST'])
