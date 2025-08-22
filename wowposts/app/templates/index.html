@@ -62,19 +62,22 @@
         flex-direction: column;
         gap: 0.5rem;
         margin-left: auto;
+        min-width: 250px;
     }
 
     .follow-btn {
-        padding: 0.3rem 0.6rem;
+        padding: 0.4rem 0.8rem; /* Увеличиваем padding */
         background: none;
         border: 1px solid var(--steel);
         color: var(--text-muted);
         font-family: 'Courier New', monospace;
-        font-size: 0.7rem;
+        font-size: 0.75rem;
         cursor: pointer;
         transition: all 0.3s;
         border-radius: 2px;
         white-space: nowrap;
+        width: 100%; /* Занимает всю ширину */
+        text-align: center;
     }
 
     .follow-btn:hover {
@@ -187,6 +190,65 @@
         box-shadow: 0 0 15px rgba(106, 0, 244, 0.4);
         text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
         animation: pulse-glow 2s infinite;
+    }
+
+    .new-post-btn {
+        display: block;
+        width: fit-content;
+        margin: 1rem auto;
+        padding: 0.8rem 2rem;
+        background: linear-gradient(45deg, var(--secondary), var(--primary));
+        border: 2px solid var(--gold);
+        color: black;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1rem;
+        transition: all 0.3s;
+        text-decoration: none;
+        box-shadow: 0 0 15px rgba(106, 0, 244, 0.4);
+    }
+
+    .new-post-btn:hover {
+        background: linear-gradient(45deg, var(--primary), var(--secondary));
+        box-shadow: 0 0 25px rgba(0, 255, 136, 0.6);
+        transform: translateY(-2px);
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 1.5rem 0;
+        gap: 1rem;
+    }
+
+    .pagination-link {
+        padding: 0.6rem 1.2rem;
+        background: var(--primary);
+        border: 1px solid var(--secondary);
+        color: black;
+        text-decoration: none;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 0 10px rgba(106, 0, 244, 0.3);
+    }
+
+    .pagination-link:hover {
+        box-shadow: 0 0 15px rgba(106, 0, 244, 0.5);
+        transform: translateY(-1px);
+    }
+
+    .current-page {
+        color: var(--text-muted);
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+        background: rgba(10, 10, 10, 0.5);
+        border: 1px solid var(--steel);
     }
 </style>
 {% endblock %}

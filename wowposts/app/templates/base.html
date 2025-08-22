@@ -160,9 +160,11 @@ body {
 /* Футер */
 .crypto-footer {
     text-align: center;
-    padding: 2rem;
     margin-top: 2rem;
-    border-top: 1px solid var(--steel);
+    padding: 2rem 1rem;
+    background: var(--primary);
+    color: black;
+    border-top: 3px solid var(--gold)
 }
 
 .footer-content {
@@ -173,17 +175,18 @@ body {
     flex-wrap: wrap;
 }
 
-.crypto-signal {
+.crypto-signal, .copyright{
     font-family: 'Courier New', monospace;
-    color: var(--primary);
+    color: black;
+    font-size: 1rem;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(0, 255, 136, 0.5);
 }
 
 .gold-divider {
-    color: var(--gold);
-}
-
-.copyright {
-    color: var(--text-muted);
+    color: black;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
 }
 
 /* Анимация вытекания кода из заголовка */

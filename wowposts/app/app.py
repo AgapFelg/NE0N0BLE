@@ -165,7 +165,7 @@ def register():
 @app.route('/')
 def home():
     page = request.args.get('page', 1, type=int)
-    posts = Post.query.order_by(Post.created_at.desc()).paginate(page=page, per_page=5)
+    posts = Post.query.order_by(Post.created_at.desc()).paginate(page=page, per_page=6)
     liked_post_ids = []
     if current_user.is_authenticated:
         liked_post_ids = [like.post_id for like in current_user.likes]
@@ -219,7 +219,6 @@ def follow(user_id):
 # Маршрут для редактирования профиля
 @app.route('/user/<username>/edit', methods=['GET', 'POST'])
 def user_edit(username):
-    print(f'!!!#@@##@$@#$@#$#@%$#@$@# {current_user.username}')
     if current_user.username != username:
         abort(403)
     form = EditProfileForm(obj=current_user)
