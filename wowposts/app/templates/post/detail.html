@@ -71,7 +71,7 @@
     .post-actions {
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: stretch; /* Изменено на stretch для выравнивания по высоте */
         margin: 2rem 0;
         padding: 1rem 0;
         border-top: 1px solid var(--border);
@@ -79,20 +79,33 @@
         gap: 1rem;
     }
 
-        .like-btn {
-        background: none;
-        border: 2px solid var(--secondary);
-        color: var(--text-main);
-        padding: 0.8rem 1.8rem;
+    .action-btn {
+        padding: 0.8rem 1.5rem;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.9rem;
         cursor: pointer;
         transition: all 0.3s;
-        font-family: 'Orbitron', sans-serif;
-        font-size: 1rem;
-        min-width: 100px;
+        border-radius: 2px;
+        min-width: 120px;
+        text-align: center;
+        text-decoration: none;
         letter-spacing: 1px;
         text-transform: uppercase;
-        position: relative;
-        overflow: hidden;
+        border: 2px solid;
+        font-weight: bold;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        line-height: 1; /* Убираем лишний межстрочный интервал */
+    }
+
+    .like-btn {
+        background: none;
+        border-color: var(--secondary);
+        color: var(--text-main);
+        margin: 0; /* Убираем возможные отступы */
     }
 
     .like-btn:hover {
@@ -103,7 +116,7 @@
 
     .like-btn.liked {
         background: var(--secondary);
-        color: white;
+        color: black;
         border-color: var(--secondary);
         box-shadow: 0 0 20px rgba(106, 0, 244, 0.5);
         text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
@@ -114,32 +127,11 @@
         transform: translateY(-2px);
     }
 
-    .edit-delete-btns {
-        display: flex;
-        gap: 1rem;
-        align-items: center;
-    }
-
-    .edit-btn, .delete-btn {
-        padding: 0.8rem 1.5rem;
-        font-family: 'Orbitron', sans-serif;
-        font-size: 0.9rem;
-        cursor: pointer;
-        transition: all 0.3s;
-        border-radius: 2px;
-        min-width: 100px;
-        text-align: center;
-        text-decoration: none;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        border: 2px solid;
-        font-weight: bold;
-    }
-
     .edit-btn {
         background: rgba(10, 10, 10, 0.5);
         border-color: var(--steel);
         color: var(--text-main);
+        margin: 0; /* Убираем возможные отступы */
     }
 
     .edit-btn:hover {
@@ -154,6 +146,7 @@
         background: rgba(10, 10, 10, 0.5);
         border-color: var(--danger);
         color: var(--danger);
+        margin: 0; /* Убираем возможные отступы */
     }
 
     .delete-btn:hover {
@@ -161,6 +154,20 @@
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(255, 56, 96, 0.2);
     }
+
+    .edit-delete-btns {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        height: 100%; /* Занимает всю высоту родителя */
+    }
+
+    .edit-delete-btns form {
+        display: flex;
+        align-items: center;
+        height: 100%;
+    }
+
     .comments-section {
         margin-top: 3rem;
     }
@@ -217,13 +224,17 @@
     .comment-submit {
         background: linear-gradient(to right, var(--primary), var(--secondary));
         border: none;
-        color: white;
-        padding: 0.7rem 2rem;
+        color: black;
+        padding: 0.8rem 2rem;
         font-family: 'Orbitron', sans-serif;
         letter-spacing: 1px;
         cursor: pointer;
         transition: all 0.3s;
         font-size: 0.9rem;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .comment-submit:hover {
@@ -335,19 +346,19 @@
 
         <!-- Действия с постом -->
         <div class="post-actions">
-            <button class="like-btn {% if current_user.is_authenticated and post in current_user.likes %}liked{% endif %}"
+            <button class="action-btn like-btn {% if current_user.is_authenticated and post in current_user.likes %}liked{% endif %}"
                     data-post-id="{{ post.id }}" id="likeButton">
                 ♠ ЛАЙК <span id="likeCount">{{ post.likes|length }}</span>
             </button>
 
             {% if current_user == post.author or current_user.is_admin %}
                 <div class="edit-delete-btns">
-                    <a href="{{ url_for('edit_post', post_id=post.id) }}" class="edit-btn">
+                    <a href="{{ url_for('edit_post', post_id=post.id) }}" class="action-btn edit-btn">
                         РЕДАКТИРОВАТЬ
                     </a>
-                    <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST" style="display: inline;">
+                    <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST" style="display: flex; align-items: center; height: 100%;">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button type="submit" class="delete-btn"
+                        <button type="submit" class="action-btn delete-btn"
                                 onclick="return confirm('УДАЛИТЬ СООБЩЕНИЕ НАВСЕГДА?')">
                             УДАЛИТЬ
                         </button>
