@@ -278,14 +278,14 @@
         <div class="access-denied">
             <h3>ДОСТУП ЗАПРЕЩЁН</h3>
             <p>Требуется аутентификация уровня <span class="aristocrat">GOLD CLEARANCE</span></p>
-            <a href="{{ url_for('login') }}" class="btn military-btn">ПОДТВЕРДИТЬ ИДЕНТИФИКАЦИЮ</a>
+            <a href="{{ url_for('auth.login') }}" class="btn military-btn">ПОДТВЕРДИТЬ ИДЕНТИФИКАЦИЮ</a>
         </div>
     {% else %}
         <div class="feed-container">
             {% if current_user.following|length == 0 %}
                 <div class="follow-promo">
                     <h3 class="aristocrat">ВНИМАНИЕ: НЕТ АКТИВНЫХ КАНАЛОВ</h3>
-                    <p>Вы не подписаны ни на одного пользователя. Найдите союзников в <a href="{{ url_for('home') }}">главном терминале</a>.</p>
+                    <p>Вы не подписаны ни на одного пользователя. Найдите союзников в <a href="{{ url_for('main.home') }}">главном терминале</a>.</p>
                 </div>
             {% elif posts|length == 0 %}
                 <div class="empty-feed">
@@ -301,14 +301,14 @@
                                 <div class="user-card">
                                     <img src="{{ url_for('static', filename='uploads/avatars/' + post.author.avatar) if post.author.avatar else url_for('static', filename='images/default-avatar.png') }}"
                                          class="post-avatar" alt="{{ post.author.username }}">
-                                    <a href="{{ url_for('show_user_profile', username=post.author.username) }}"
+                                    <a href="{{ url_for('user.show_user_profile', username=post.author.username) }}"
                                        class="post-author">
                                         {{ post.author.username }}
                                     </a>
                                 </div>
 
                                 <div class="post-actions">
-                                    <a href="{{ url_for('detail_post', post_id=post.id) }}" class="comment-link">
+                                    <a href="{{ url_for('post.detail_post', post_id=post.id) }}" class="comment-link">
                                         💬 КОММЕНТИРОВАТЬ
                                     </a>
                                 </div>
@@ -349,7 +349,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
 
             if (!{{ 'true' if current_user.is_authenticated else 'false' }}) {
-                window.location.href = "{{ url_for('login') }}";
+                window.location.href = "{{ url_for('auth.login') }}";
                 return;
             }
 
@@ -387,7 +387,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } catch (error) {
                 console.error('Error:', error);
                 if (error.message.includes('401')) {
-                    window.location.href = "{{ url_for('login') }}";
+                    window.location.href = "{{ url_for('auth.login') }}";
                 }
             }
         });

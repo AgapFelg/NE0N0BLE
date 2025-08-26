@@ -144,7 +144,7 @@
             <p>Создание новых учетных данных уровня <span class="aristocrat">BRONZE</span></p>
         </div>
 
-        <form method="POST" action="{{ url_for('register') }}" class="register-form">
+        <form method="POST" action="{{ url_for('auth.register') }}" class="register-form">
     {{ form.hidden_tag() }}
 
     <div class="form-group">
@@ -183,7 +183,7 @@
 </form>
 
         <div class="register-footer">
-            Уже есть доступ? <a href="{{ url_for('login') }}">Авторизоваться</a>
+            Уже есть доступ? <a href="{{ url_for('auth.login') }}">Авторизоваться</a>
         </div>
     </div>
 </div>

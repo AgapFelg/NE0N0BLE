@@ -392,7 +392,7 @@
                             {% if current_user.is_following(user) %}ОТПИСАТЬСЯ{% else %}ПОДПИСАТЬСЯ{% endif %}
                         </button>
                     {% else %}
-                        <a href="{{ url_for('user_edit', username=user.username) }}" class="edit-btn">
+                        <a href="{{ url_for('user.user_edit', username=user.username) }}" class="edit-btn">
                             РЕДАКТИРОВАТЬ
                         </a>
                     {% endif %}
@@ -421,14 +421,14 @@
                                 <div class="user-card">
                                     <img src="{{ url_for('static', filename='uploads/avatars/' + post.author.avatar) if post.author.avatar else url_for('static', filename='images/default-avatar.png') }}"
                                          class="post-avatar" alt="{{ post.author.username }}">
-                                    <a href="{{ url_for('show_user_profile', username=post.author.username) }}"
+                                    <a href="{{ url_for('user.show_user_profile', username=post.author.username) }}"
                                        class="post-author">
                                         {{ post.author.username }}
                                     </a>
                                 </div>
 
                                 <div class="post-actions">
-                                    <a href="{{ url_for('detail_post', post_id=post.id) }}" class="comment-link">
+                                    <a href="{{ url_for('post.detail_post', post_id=post.id) }}" class="comment-link">
                                         💬 ...
                                     </a>
                                 </div>
@@ -477,7 +477,7 @@
                                 </div>
 
                                 <div class="post-actions">
-                                    <a href="{{ url_for('detail_post', post_id=post.id) }}" class="comment-link">
+                                    <a href="{{ url_for('post.detail_post', post_id=post.id) }}" class="comment-link">
                                         💬 ...
                                     </a>
                                 </div>
@@ -526,7 +526,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     e.stopPropagation();
 
                     if (!{{ 'true' if current_user.is_authenticated else 'false' }}) {
-                        window.location.href = "{{ url_for('login') }}";
+                        window.location.href = "{{ url_for('auth.login') }}";
                         return;
                     }
 
@@ -570,7 +570,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     } catch (error) {
                         console.error('Error:', error);
                         if (error.message.includes('401')) {
-                            window.location.href = "{{ url_for('login') }}";
+                            window.location.href = "{{ url_for('auth.login') }}";
                         }
                     }
                 });
@@ -615,12 +615,12 @@ document.addEventListener('DOMContentLoaded', function() {
     window.toggleFollow = async function(userId) {
         const isAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
         if (!isAuthenticated) {
-            window.location.href = "{{ url_for('login') }}";
+            window.location.href = "{{ url_for('auth.login') }}";
             return;
         }
 
         try {
-            const response = await fetch(`/user/${userId}/follow`, {
+            const response = await fetch(`/user/user/${userId}/follow`, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': '{{ csrf_token() }}',
@@ -630,7 +630,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             if (response.status === 401) {
-                window.location.href = "{{ url_for('login') }}";
+                window.location.href = "{{ url_for('auth.login') }}";
                 return;
             }
 

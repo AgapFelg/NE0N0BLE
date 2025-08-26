@@ -127,7 +127,7 @@
         <p>Требуется авторизация уровня <span class="aristocrat">SILVER CLEARANCE</span></p>
     </div>
 
-    <form method="POST" action="{{ url_for('login') }}" class="login-form">
+    <form method="POST" action="{{ url_for('auth.login') }}" class="login-form">
         {{ form.hidden_tag() }}
 
         <div class="form-group">
@@ -162,7 +162,7 @@
     </form>
 
     <div class="login-footer">
-        Нет учетной записи? <a href="{{ url_for('register') }}">Запросить доступ</a>
+        Нет учетной записи? <a href="{{ url_for('auth.register') }}">Запросить доступ</a>
     </div>
 </div>
 {% endblock %}

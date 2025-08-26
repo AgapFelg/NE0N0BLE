@@ -164,7 +164,7 @@
             <p>ID СЕССИИ: {{ current_user.id }}_{{ "%04d"|format(range(1, 9999)|random) }}</p>
         </div>
 
-        <form method="POST" action="{{ url_for('create_post') }}" enctype="multipart/form-data" class="create-form">
+        <form method="POST" action="{{ url_for('post.create_post') }}" enctype="multipart/form-data" class="create-form">
             {{ form.hidden_tag() }}
 
             <div class="form-group">
@@ -184,7 +184,7 @@
             </div>
 
             <div class="form-actions">
-                <a href="{{ url_for('home') }}" class="cancel-btn">ОТМЕНА</a>
+                <a href="{{ url_for('main.home') }}" class="cancel-btn">ОТМЕНА</a>
                 {{ form.submit(class="submit-btn") }}
             </div>
         </form>

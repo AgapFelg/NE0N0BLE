@@ -4,7 +4,7 @@ from flask_login import login_required, current_user
 from models import Like, Post, db
 
 # инициализация блюпринта для разных маршрутов
-some_bp = Blueprint('some', __name__, url_prefix='/auth')
+some_bp = Blueprint('some', __name__)
 
 # МАРШРУТ ДЛЯ ЗАГРУЗКИ ФАЙЛОВ
 @some_bp.route('/upload')

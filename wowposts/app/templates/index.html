@@ -257,7 +257,7 @@
 <div class="terminal">
     <!-- Блок создания нового поста (только для авторизованных) -->
     {% if current_user.is_authenticated %}
-        <a href="{{ url_for('create_post') }}" class="new-post-btn">
+        <a href="{{ url_for('post.create_post') }}" class="new-post-btn">
             [ + НОВОЕ СООБЩЕНИЕ ]
         </a>
     {% endif %}
@@ -271,7 +271,7 @@
                         <div class="user-card">
                             <img src="{{ url_for('static', filename='uploads/avatars/' + post.author.avatar) if post.author.avatar else url_for('static', filename='images/default-avatar.png') }}"
                                  class="post-avatar" alt="{{ post.author.username }}">
-                            <a href="{{ url_for('show_user_profile', username=post.author.username) }}"
+                            <a href="{{ url_for('user.show_user_profile', username=post.author.username) }}"
                                class="post-author">
                                 {{ post.author.username }}
                             </a>
@@ -286,7 +286,7 @@
                                 </button>
                             {% endif %}
 
-                            <a href="{{ url_for('detail_post', post_id=post.id) }}" class="comment-link">
+                            <a href="{{ url_for('post.detail_post', post_id=post.id) }}" class="comment-link">
                                 💬 ...
                             </a>
                         </div>
@@ -317,7 +317,7 @@
         <!-- Пагинация -->
         <div class="pagination">
             {% if posts.has_prev %}
-                <a href="{{ url_for('home', page=posts.prev_num) }}" class="pagination-link">← ПРЕД</a>
+                <a href="{{ url_for('main.home', page=posts.prev_num) }}" class="pagination-link">← ПРЕД</a>
             {% endif %}
 
             <span class="current-page">
@@ -325,7 +325,7 @@
             </span>
 
             {% if posts.has_next %}
-                <a href="{{ url_for('home', page=posts.next_num) }}" class="pagination-link">СЛЕД →</a>
+                <a href="{{ url_for('main.home', page=posts.next_num) }}" class="pagination-link">СЛЕД →</a>
             {% endif %}
         </div>
 
@@ -347,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
 
             if (!{{ 'true' if current_user.is_authenticated else 'false' }}) {
-                window.location.href = "{{ url_for('login') }}";
+                window.location.href = "{{ url_for('auth.login') }}";
                 return;
             }
 
@@ -385,7 +385,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } catch (error) {
                 console.error('Error:', error);
                 if (error.message.includes('401')) {
-                    window.location.href = "{{ url_for('login') }}";
+                    window.location.href = "{{ url_for('auth.login') }}";
                 }
             }
         });
@@ -394,12 +394,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Глобальная функция для обработки подписок
     window.toggleFollow = async function(userId) {
         if (!{{ 'true' if current_user.is_authenticated else 'false' }}) {
-            window.location.href = "{{ url_for('login') }}";
+            window.location.href = "{{ url_for('auth.login') }}";
             return;
         }
 
         try {
-            const response = await fetch(`/user/${userId}/follow`, {
+            const response = await fetch(`/user/user/${userId}/follow`, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': '{{ csrf_token() }}'

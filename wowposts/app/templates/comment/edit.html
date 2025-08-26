@@ -44,7 +44,7 @@
     }
 
     .edit-form textarea {
-        width: 100%;
+        width: 95%;
         min-height: 150px;
         padding: 1rem;
         background: var(--bg-dark);
@@ -67,15 +67,27 @@
         margin-top: 1.5rem;
     }
 
-    .save-btn {
-        padding: 0.7rem 2rem;
-        background: linear-gradient(to right, var(--primary), var(--secondary));
-        border: none;
-        color: white;
+    .save-btn, .cancel-btn {
+        padding: 0.8rem 1.5rem;
         font-family: 'Orbitron', sans-serif;
         letter-spacing: 1px;
         cursor: pointer;
         transition: all 0.3s;
+        height: 44px; /* Одинаковая высота для обеих кнопок */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 120px;
+        box-sizing: border-box;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    .save-btn {
+        background: linear-gradient(to right, var(--secondary), var(--gold));
+        border: none;
+        color: var(--bg-dark);
+        font-weight: bold;
     }
 
     .save-btn:hover {
@@ -83,14 +95,9 @@
     }
 
     .cancel-btn {
-        padding: 0.7rem 1.5rem;
         background: none;
         border: 1px solid var(--steel);
         color: var(--text-main);
-        font-family: 'Orbitron', sans-serif;
-        letter-spacing: 1px;
-        cursor: pointer;
-        transition: all 0.3s;
     }
 
     .cancel-btn:hover {
@@ -102,6 +109,9 @@
         margin-top: 2rem;
         padding: 1rem;
         border: 1px dashed var(--border);
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        white-space: pre-wrap;
     }
 
     .original-post h4 {
@@ -125,13 +135,13 @@
             <span>{{ comment.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
         </div>
 
-        <form method="POST" action="{{ url_for('edit_comment', comment_id=comment.id) }}" class="edit-form">
+        <form method="POST" action="{{ url_for('comment.edit_comment', comment_id=comment.id) }}" class="edit-form">
             {{ form.hidden_tag() }}
 
             <textarea id="text" name="text" required>{{ comment.text }}</textarea>
 
             <div class="form-actions">
-                <a href="{{ url_for('detail_post', post_id=comment.post_id) }}" class="cancel-btn">ОТМЕНА</a>
+                <a href="{{ url_for('post.detail_post', post_id=comment.post_id) }}" class="cancel-btn">ОТМЕНА</a>
                 <button type="submit" class="save-btn">СОХРАНИТЬ</button>
             </div>
         </form>

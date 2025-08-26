@@ -193,7 +193,7 @@
             <p>ID: {{ current_user.id }} | Уровень доступа: <span class="aristocrat">SILVER</span></p>
         </div>
 
-        <form method="POST" action="{{ url_for('user_edit', username=current_user.username) }}" enctype="multipart/form-data" class="edit-form">
+        <form method="POST" action="{{ url_for('user.user_edit', username=current_user.username) }}" enctype="multipart/form-data" class="edit-form">
             {{ form.hidden_tag() }}
 
             <!-- Секция аватара -->
@@ -245,7 +245,7 @@
             </div>
 
             <div class="form-actions">
-                <a href="{{ url_for('show_user_profile', username=current_user.username) }}" class="cancel-btn">
+                <a href="{{ url_for('user.show_user_profile', username=current_user.username) }}" class="cancel-btn">
                     ОТМЕНА
                 </a>
                 <button type="submit" class="save-btn">

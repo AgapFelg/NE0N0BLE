@@ -326,7 +326,7 @@
         <div class="post-header">
             <img src="{{ url_for('static', filename='uploads/avatars/' + post.author.avatar) if post.author.avatar else url_for('static', filename='images/default-avatar.png') }}"
                  class="post-avatar" alt="{{ post.author.username }}">
-            <a href="{{ url_for('show_user_profile', username=post.author.username) }}" class="post-author">
+            <a href="{{ url_for('user.show_user_profile', username=post.author.username) }}" class="post-author">
                 {{ post.author.username }}
             </a>
             <div class="post-meta">
@@ -353,10 +353,10 @@
 
             {% if current_user == post.author or current_user.is_admin %}
                 <div class="edit-delete-btns">
-                    <a href="{{ url_for('edit_post', post_id=post.id) }}" class="action-btn edit-btn">
+                    <a href="{{ url_for('post.edit_post', post_id=post.id) }}" class="action-btn edit-btn">
                         РЕДАКТИРОВАТЬ
                     </a>
-                    <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST" style="display: flex; align-items: center; height: 100%;">
+                    <form action="{{ url_for('post.delete_post', post_id=post.id) }}" method="POST" style="display: flex; align-items: center; height: 100%;">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="action-btn delete-btn"
                                 onclick="return confirm('УДАЛИТЬ СООБЩЕНИЕ НАВСЕГДА?')">
@@ -373,7 +373,7 @@
 
             <!-- Форма добавления комментария -->
             {% if current_user.is_authenticated %}
-                <form method="POST" action="{{ url_for('add_comment', post_id=post.id) }}" class="comment-form">
+                <form method="POST" action="{{ url_for('comment.add_comment', post_id=post.id) }}" class="comment-form">
                     {{ form.hidden_tag() }}
                     <textarea name="text" placeholder="ВАШ КОММЕНТАРИЙ..." required
                               maxlength="1000" oninput="autoResize(this)"></textarea>
@@ -381,7 +381,7 @@
                 </form>
             {% else %}
                 <div class="login-prompt">
-                    <p>Для комментирования <a href="{{ url_for('login') }}">требуется авторизация</a>.</p>
+                    <p>Для комментирования <a href="{{ url_for('auth.login') }}">требуется авторизация</a>.</p>
                 </div>
             {% endif %}
 
@@ -390,7 +390,7 @@
                 {% for comment in post.comments %}
                     <div class="comment">
                         <div class="comment-header">
-                            <a href="{{ url_for('show_user_profile', username=comment.author.username) }}"
+                            <a href="{{ url_for('user.show_user_profile', username=comment.author.username) }}"
                                class="comment-author">
                                 {{ comment.author.username }}
                             </a>
@@ -402,8 +402,8 @@
 
                         {% if current_user == comment.author or current_user.is_admin %}
                             <div class="comment-actions">
-                                <a href="{{ url_for('edit_comment', comment_id=comment.id) }}">✎ Редактировать</a>
-                                <a href="{{ url_for('delete_comment', comment_id=comment.id) }}"
+                                <a href="{{ url_for('comment.edit_comment', comment_id=comment.id) }}">✎ Редактировать</a>
+                                <a href="{{ url_for('comment.delete_comment', comment_id=comment.id) }}"
                                    onclick="return confirm('УДАЛИТЬ КОММЕНТАРИЙ?')">✖ Удалить</a>
                             </div>
                         {% endif %}
@@ -424,7 +424,7 @@
     // Обработка лайков через AJAX
     document.getElementById('likeButton').addEventListener('click', async function() {
         if (!{{ 'true' if current_user.is_authenticated else 'false' }}) {
-            window.location.href = "{{ url_for('login') }}";
+            window.location.href = "{{ url_for('auth.login') }}";
             return;
         }
 

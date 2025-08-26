@@ -5,6 +5,7 @@ from wtforms import StringField, PasswordField, SubmitField, TextAreaField, File
 # импорт валидации
 from wtforms.validators import DataRequired, Email, Length, EqualTo, Optional
 
+# форма для логина, емейл, пароль и кнопка подтвержлдения
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -15,6 +16,7 @@ class RegistrationForm(FlaskForm):
     username = StringField('Имя', validators=[DataRequired(), Length(min=3, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Пароль', validators=[DataRequired(), Length(min=8)])
+    # тут проверяется, одинаковое ли значение в обоих полях и если оно отличается, то сообщается, что пароли должны совпадать
     confirm_password = PasswordField('Нужно повторить пароль', validators=[DataRequired(), EqualTo('password', message="Пароли должны совпадать")])
     submit = SubmitField('Зарегистрироваться')
 

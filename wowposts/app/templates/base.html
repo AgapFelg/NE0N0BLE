@@ -257,15 +257,15 @@ body {
         <canvas id="header-matrix"></canvas>
         <div class="header-grid">
             <nav class="main-nav">
-                <a href="{{ url_for('home') }}" class="nav-logo">/NE0N0BLE/</a>
+                <a href="{{ url_for('main.home') }}" class="nav-logo">/NE0N0BLE/</a>
                 <div class="nav-links">
-                    <a href="{{ url_for('home') }}" class="nav-link">ГЛАВНАЯ</a>
-                    <a href="{{ url_for('feed') }}" class="nav-link">ЛЕНТА</a>
+                    <a href="{{ url_for('main.home') }}" class="nav-link">ГЛАВНАЯ</a>
+                    <a href="{{ url_for('main.feed') }}" class="nav-link">ЛЕНТА</a>
                     {% if current_user.is_authenticated %}
-                        <a href="{{ url_for('show_user_profile', username=current_user.username) }}" class="nav-link">ПРОФИЛЬ</a>
-                        <a href="{{ url_for('logout') }}" class="nav-link">ВЫХОД</a>
+                        <a href="{{ url_for('user.show_user_profile', username=current_user.username) }}" class="nav-link">ПРОФИЛЬ</a>
+                        <a href="{{ url_for('auth.logout') }}" class="nav-link">ВЫХОД</a>
                     {% else %}
-                        <a href="{{ url_for('login') }}" class="nav-link">ВОЙТИ</a>
+                        <a href="{{ url_for('auth.login') }}" class="nav-link">ВОЙТИ</a>
                     {% endif %}
                 </div>
             </nav>
