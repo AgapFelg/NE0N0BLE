@@ -209,14 +209,6 @@
                 <div class="current-image">
                     <p>Текущее изображение:</p>
                     <img src="{{ url_for('static', filename='uploads/posts/' + post.image) }}" alt="Current image">
-                    <div class="image-controls">
-                        <button type="button" class="keep-image" onclick="document.getElementById('keep_image').value = '1'">
-                            СОХРАНИТЬ ИЗОБРАЖЕНИЕ
-                        </button>
-                        <button type="button" class="remove-image" onclick="document.getElementById('remove_image').value = '1'">
-                            УДАЛИТЬ ИЗОБРАЖЕНИЕ
-                        </button>
-                    </div>
                     <input type="hidden" id="keep_image" name="keep_image" value="0">
                     <input type="hidden" id="remove_image" name="remove_image" value="0">
                 </div>
@@ -251,13 +243,5 @@
         }
     });
 
-    // Подтверждение перед выходом
-    window.addEventListener('beforeunload', function(e) {
-        const textarea = document.querySelector('textarea');
-        if (textarea.value !== `{{ post.text }}`) {
-            e.preventDefault();
-            e.returnValue = 'У вас есть несохранённые изменения. Вы уверены, что хотите уйти?';
-        }
-    });
 </script>
 {% endblock %}

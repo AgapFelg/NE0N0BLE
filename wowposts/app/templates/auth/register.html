@@ -59,6 +59,7 @@
         border: 1px solid var(--steel);
         color: var(--text-main);
         font-family: 'Courier New', monospace;
+        box-sizing: border-box;
     }
 
     .register-form input:focus {
@@ -74,7 +75,6 @@
     }
 
     .register-btn {
-        width: 100%;
         padding: 0.8rem;
         background: linear-gradient(to right, var(--gold), var(--secondary));
         border: none;
@@ -166,6 +166,12 @@
     <div class="form-group">
         <label for="password">▸ СЕКРЕТНЫЙ КОД:</label>
         {{ form.password(class="form-control") }}
+        <div class="password-strength">
+        <div class="strength-bar"></div>
+    </div>
+    <div class="requirements">
+        Требования: минимум 8 символов
+    </div>
         {% for error in form.password.errors %}
             <span style="color: red;">{{ error }}</span>
         {% endfor %}

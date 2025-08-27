@@ -198,13 +198,5 @@
         document.getElementById('file-name').textContent = `Выбрано: ${fileName}`;
     });
 
-    // Подтверждение перед выходом
-    window.addEventListener('beforeunload', function(e) {
-        const textarea = document.querySelector('textarea');
-        if (textarea.value.trim() !== '') {
-            e.preventDefault();
-            e.returnValue = 'У вас есть несохранённые изменения. Вы уверены, что хотите уйти?';
-        }
-    });
 </script>
 {% endblock %}

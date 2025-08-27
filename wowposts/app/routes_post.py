@@ -103,35 +103,56 @@ def edit_post(post_id):
                 except OSError:
                     # если отлавливается ошибка ОС при попытке удалить изображение, то пропускается
                     pass
-            # Сохраняем новое изображение
+            # cохраняем новое изображение
+            # получение безопасного имени файла
             filename = secure_filename(form.image.data.filename)
+            # создание уникального имени файла
             unique_filename = f"{post.id}_{int(time.time())}_{filename}"
+            # составление пути к файлу
             filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], 'posts', unique_filename)
+            # сохранение изображения по составленному пути к файлу
             form.image.data.save(filepath)
+            # запись имени файла в БД
             post.image = unique_filename
-        # Обработка удаления изображения
+        # обработка удаления изображения
+        # если в запросе есть удаление изображения
         if 'remove_image' in request.form and request.form['remove_image'] == '1':
+            # если есть изображение в БД
             if post.image:
                 try:
+                    # удаление изображения из файловой системы
                     os.remove(os.path.join(current_app.config['UPLOAD_FOLDER'], 'posts', post.image))
                 except OSError:
+                    # если отлавливается ошибка ОС, то пропускается
                     pass
+            # в БД пишется, что изображения у поста нет
             post.image = None
+        # сохранение изменений в БД
         db.session.commit()
+        # вывод сообщения о том, что пост обновлен
         flash('Пост успешно обновлен', 'success')
+        # редиректит на полученный url_for url для данного поста
         return redirect(url_for('post.detail_post', post_id=post.id))
+    # рендерит хтмл релдактирования поста
     return render_template('post/edit.html', post=post, form=form)
 
 # маршрут удаления поста
 @post_bp.route('/post/<int:post_id>/delete', methods=['POST'])
+# необходим логин
 @login_required
 def delete_post(post_id):
+    # получение поста по айди
     post = Post.query.get_or_404(post_id)
-    if post.author != current_user and not current_user.is_admin:
+    # если пользователь не является автором поста, то абортит
+    if post.author != current_user:
         abort(403)
+    # если в посте присутствовало изображение, то удаляет изображение из файловой системы
     if post.image:
         os.remove(os.path.join(current_app.config['UPLOAD_FOLDER'], 'posts', post.image))
+    # пост удаляется из БД
     db.session.delete(post)
+    # изменения в БД сохраняются
     db.session.commit()
+    # выводится сообщение о том, что пост удален и происходит редирект на главную страницу
     flash('Пост делитнут', 'info')
     return redirect(url_for('main.home'))
