@@ -141,7 +141,7 @@ app/
 
 ## 👨‍💻 Автор
 
-**Твое Имя или Псевдоним**
+**Нагорный Д**
 
 *   Telegram: [@kagatuta](https://t.me/kagatuta)
 *   Email: sagot9672@gmail.com
