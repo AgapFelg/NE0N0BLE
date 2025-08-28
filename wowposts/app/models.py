@@ -110,7 +110,7 @@ class Follow(db.Model):
     __tablename__ = 'follows'
     id = db.Column(db.Integer, primary_key=True)
     follower_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False) # кто подписан
-    followed_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False) # на кого подписан
+    followed_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False) # на кого подписанд
     created_at = db.Column(db.DateTime, default=datetime.now)
 
     # ограничение, чтобы один юзер мог иметь только одну подписпку на другого пользователя (чтобы Леша не был подписан на Петю 5 раз)

@@ -33,6 +33,7 @@ body {
     overflow-x: hidden;
     position: relative;
     min-height: 100vh;
+
 }
 
 /* Контейнер для матричного фона */
@@ -72,7 +73,7 @@ body {
 .nav-logo {
     font-family: 'Orbitron', sans-serif;
     font-size: 2rem;
-    font-weight: 700;
+    font-weight: 300;
     color: var(--primary);
     text-decoration: none;
     text-shadow: 0 0 10px rgba(0, 255, 136, 0.7);
@@ -87,7 +88,7 @@ body {
 .nav-links {
     font-family: 'Orbitron', sans-serif;
     font-size: 2rem;
-    font-weight: 700;
+    font-weight: 100;
     color: var(--primary);
     text-decoration: none;
     text-shadow: 0 0 10px rgba(0, 255, 136, 0.7);
@@ -165,6 +166,7 @@ body {
     background: var(--primary);
     color: black;
     border-top: 3px solid var(--gold)
+    flex-shrink: 0;
 }
 
 .footer-content {
@@ -257,7 +259,7 @@ body {
         <canvas id="header-matrix"></canvas>
         <div class="header-grid">
             <nav class="main-nav">
-                <a href="{{ url_for('main.home') }}" class="nav-logo">/NE0N0BLE/</a>
+                <a href="{{ url_for('main.home') }}" class="nav-logo">/|NE0N0BLE|ネオノブル|\</a>
                 <div class="nav-links">
                     <a href="{{ url_for('main.home') }}" class="nav-link">ГЛАВНАЯ</a>
                     <a href="{{ url_for('main.feed') }}" class="nav-link">ЛЕНТА</a>
