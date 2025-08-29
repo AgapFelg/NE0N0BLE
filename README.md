@@ -38,8 +38,8 @@ NE0N0BLE | ネオノブル
 
 1.  **Клонируй репозиторий:**
     ```bash
-    git clone https://github.com/your_username/neonoble.git
-    cd neonoble
+    git clone https://github.com/your_username/NE0N0BLE.git
+    cd NE0N0BLE
     ```
 
 2.  **Создай и активируй виртуальное окружение:**
@@ -57,6 +57,7 @@ NE0N0BLE | ネオノブル
 
 4.  **Наполни базу данных тестовым контентом:**
     ```bash
+    cd neonoble/app/
     python CONTENT_FILLING.py
     ```
     *Это создаст 10 пользователей, 44 поста, лайки, комментарии и подписки.*
