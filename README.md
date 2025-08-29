@@ -33,6 +33,9 @@ NE0N0BLE | ネオノブル
 
 ## 📦 Установка и Запуск
 
+Необходим PostgreSQL.
+Строка подключения к psql указывается в файле .env.
+
 1.  **Клонируй репозиторий:**
     ```bash
     git clone https://github.com/your_username/neonoble.git
@@ -125,6 +128,7 @@ app/
 │ ├── feed.html # Лента публикаций
 │ └── index.html # Главная страница
 │
+├── 📄 .env - Файл с секретами. SECRET_KEY - ключ приложения, DATABASE_URI - строка подключения к БД.
 ├── 📄 app.py # Основное приложение Flask
 ├── 📄 config.py # Конфигурационные параметры
 ├── 📄 CONTENT_FILLING.py # Скрипт наполнения БД данными
